@@ -13,6 +13,7 @@
             color: #f3f4f6;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
         .glow-card {
             background: rgba(17, 24, 39, 0.85);
@@ -33,25 +34,43 @@
             color: #ffffff;
             border: 1px solid #5a4f31;
         }
-        .nav-tab.active {
-            color: #10b981;
-            border-bottom: 3px solid #10b981;
+        .nav-tab-btn.active {
+            color: #10b981 !important;
+            border-bottom: 3px solid #10b981 !important;
         }
-        .bottom-nav-item.active {
-            color: #10b981;
+        .bottom-nav-btn.active {
+            color: #10b981 !important;
         }
         .btn-gradient {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         }
         .btn-gradient:active {
-            transform: scale(0.98);
+            transform: scale(0.97);
+        }
+        .item-img-box {
+            width: 56px;
+            height: 56px;
+            min-width: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .item-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 4px;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between pb-24">
+<body class="min-h-screen flex flex-col justify-between pb-24 select-none">
 
     <!-- Top Header -->
-    <header class="w-full border-b border-gray-800 bg-gray-900/80 sticky top-0 z-40 backdrop-blur-md px-4 py-3">
+    <header class="w-full border-b border-gray-800 bg-gray-900/90 sticky top-0 z-40 backdrop-blur-md px-4 py-3">
         <div class="max-w-md mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-2">
                 <span class="text-2xl">🌱</span>
@@ -69,11 +88,11 @@
 
         <!-- Tab Bar phía trên -->
         <div class="max-w-md mx-auto flex border-t border-gray-800/60 mt-3 pt-1 text-center font-bold text-xs">
-            <button id="topTabShop" onclick="switchTab('shop')" class="nav-tab active flex-1 py-2.5 transition flex items-center justify-center space-x-2 text-gray-400">
+            <button id="topTabShop" onclick="switchTab('shop')" class="nav-tab-btn active flex-1 py-2.5 transition flex items-center justify-center space-x-2 text-gray-400">
                 <i class="fa-solid fa-store text-base"></i>
                 <span>Cửa Hàng (Shop)</span>
             </button>
-            <button id="topTabGetlink" onclick="switchTab('getlink')" class="nav-tab flex-1 py-2.5 transition flex items-center justify-center space-x-2 text-gray-400">
+            <button id="topTabGetlink" onclick="switchTab('getlink')" class="nav-tab-btn flex-1 py-2.5 transition flex items-center justify-center space-x-2 text-gray-400">
                 <i class="fa-solid fa-coins text-base"></i>
                 <span>Nhiệm Vụ (Getlink)</span>
             </button>
@@ -91,11 +110,10 @@
                 </div>
                 <div>
                     <span class="text-[10px] text-gray-400 uppercase tracking-wider block font-semibold">TÊN:ACC ROBLOX</span>
-                    <!-- Hiển thị mặc định nếu chưa nhập -->
                     <span id="activeUsername" class="text-xs font-bold text-white">Chưa có tên người nhận</span>
                 </div>
             </div>
-            <button onclick="promptUsername()" class="text-[11px] bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 font-bold px-3 py-1.5 rounded-lg border border-emerald-500/30 transition">
+            <button onclick="promptUsername()" class="text-[11px] bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 font-bold px-3 py-1.5 rounded-lg border border-emerald-500/30 transition active:scale-95">
                 Đổi ID
             </button>
         </div>
@@ -111,11 +129,11 @@
                 <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-medium">Tự động trả quà</span>
             </div>
 
-            <!-- Item 1: Super Watering Can (Dùng đúng ảnh 1645.jpg) -->
+            <!-- Item 1: Super Watering Can (Dùng ảnh thực tế nhúng trực tiếp) -->
             <div class="glow-card p-4 rounded-2xl flex items-center justify-between hover:border-emerald-500/40 transition overflow-hidden">
                 <div class="flex items-center space-x-3.5">
-                    <div class="w-14 h-14 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center p-1 overflow-hidden">
-                        <img src="1645.jpg" alt="Super Watering Can" class="w-full h-full object-contain rounded-xl">
+                    <div class="item-img-box border-blue-500/30">
+                        <img src="https://v2.zue.dev/file/48d56bfd3810f5453e0f0.jpg" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'50%\' x=\'50%\' text-anchor=\'middle\' fill=\'white\'>💧</text></svg>';" alt="Super Watering Can">
                     </div>
                     <div>
                         <h3 class="font-bold text-sm text-white">Super Watering Can</h3>
@@ -130,11 +148,11 @@
                 </button>
             </div>
 
-            <!-- Item 2: Super Sprinkler (Dùng đúng ảnh 1646.jpg, Giá 5 điểm) -->
+            <!-- Item 2: Super Sprinkler (Dùng ảnh thực tế nhúng trực tiếp) -->
             <div class="glow-card p-4 rounded-2xl flex items-center justify-between hover:border-emerald-500/40 transition overflow-hidden">
                 <div class="flex items-center space-x-3.5">
-                    <div class="w-14 h-14 bg-purple-500/10 border border-purple-500/20 rounded-2xl flex items-center justify-center p-1 overflow-hidden">
-                        <img src="1646.jpg" alt="Super Sprinkler" class="w-full h-full object-contain rounded-xl">
+                    <div class="item-img-box border-purple-500/30">
+                        <img src="https://v2.zue.dev/file/5a54ec2cf0c8f5f6bd5b6.jpg" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'50%\' x=\'50%\' text-anchor=\'middle\' fill=\'white\'>⚙️</text></svg>';" alt="Super Sprinkler">
                     </div>
                     <div>
                         <h3 class="font-bold text-sm text-white">Super Sprinkler</h3>
@@ -149,11 +167,11 @@
                 </button>
             </div>
 
-            <!-- Item 3: Dragon Breath (Dùng đúng ảnh 1647.jpg) -->
+            <!-- Item 3: Dragon Breath (Dùng ảnh thực tế nhúng trực tiếp) -->
             <div class="glow-card p-4 rounded-2xl flex items-center justify-between hover:border-emerald-500/40 transition overflow-hidden">
                 <div class="flex items-center space-x-3.5">
-                    <div class="w-14 h-14 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-center p-1 overflow-hidden">
-                        <img src="1647.jpg" alt="Dragon Breath" class="w-full h-full object-contain rounded-xl">
+                    <div class="item-img-box border-red-500/30">
+                        <img src="https://v2.zue.dev/file/e3d4cb803a64937cb625f.jpg" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'50%\' x=\'50%\' text-anchor=\'middle\' fill=\'white\'>🔥</text></svg>';" alt="Dragon Breath">
                     </div>
                     <div>
                         <h3 class="font-bold text-sm text-white">Dragon Breath</h3>
@@ -168,11 +186,11 @@
                 </button>
             </div>
 
-            <!-- Lưu ý gửi quà -->
-            <div class="bg-gray-900/60 border border-gray-800 p-3.5 rounded-xl text-[11px] text-gray-400 space-y-1">
+            <!-- Quy trình nhận quà -->
+            <div class="bg-gray-900/70 border border-gray-800 p-3.5 rounded-xl text-[11px] text-gray-400 space-y-1">
                 <p class="font-semibold text-gray-300"><i class="fa-solid fa-circle-info text-emerald-400 mr-1"></i> Quy trình nhận quà:</p>
-                <p>1. Bấm đổi quà $\rightarrow$ Đơn chuyển tới kho Admin.</p>
-                <p>2. Admin sẽ kết bạn Roblox & Gift trực tiếp vào túi đồ trong game trong 5-10 phút.</p>
+                <p>1. Bấm đổi quà &#8594; Đơn chuyển tới kho Admin.</p>
+                <p>2. Admin kết bạn Roblox & Gift trực tiếp vào túi đồ trong game trong 5-10 phút.</p>
             </div>
         </section>
 
@@ -217,14 +235,14 @@
                 <div class="text-[10px] text-gray-500 font-medium tracking-wider">00:00:00 Thứ 2 hàng tuần</div>
             </div>
 
-            <!-- NÚT VƯỢT LINK -->
+            <!-- NÚT VƯỢT LINK CHIẾN SĨ -->
             <div class="glow-card p-4 rounded-2xl space-y-3">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-bold text-gray-300">Lượt vượt hôm nay:</span>
                     <span id="ipCounter" class="text-xs font-extrabold text-emerald-400">0 / 2 Lượt</span>
                 </div>
 
-                <button onclick="startGetlinkTask()" class="w-full btn-gradient text-white font-extrabold py-3.5 rounded-xl shadow-lg shadow-emerald-900/30 flex items-center justify-center space-x-2 transition">
+                <button onclick="startGetlinkTask()" class="w-full btn-gradient text-white font-extrabold py-3.5 rounded-xl shadow-lg shadow-emerald-900/30 flex items-center justify-center space-x-2 transition active:scale-95">
                     <i class="fa-solid fa-bolt text-amber-300"></i>
                     <span>BẮT ĐẦU VƯỢT LINK (+5 ĐIỂM)</span>
                 </button>
@@ -239,7 +257,7 @@
         <div class="max-w-md mx-auto flex justify-around py-2">
             
             <!-- Icon 1: Shop -->
-            <button id="bottomNavShop" onclick="switchTab('shop')" class="bottom-nav-item active flex flex-col items-center justify-center w-1/2 py-1 text-gray-400 transition">
+            <button id="bottomNavShop" onclick="switchTab('shop')" class="bottom-nav-btn active flex flex-col items-center justify-center w-1/2 py-1 text-gray-400 transition">
                 <div class="text-xl mb-0.5">
                     <i class="fa-solid fa-store"></i>
                 </div>
@@ -247,7 +265,7 @@
             </button>
 
             <!-- Icon 2: Getlink -->
-            <button id="bottomNavGetlink" onclick="switchTab('getlink')" class="bottom-nav-item flex flex-col items-center justify-center w-1/2 py-1 text-gray-400 transition">
+            <button id="bottomNavGetlink" onclick="switchTab('getlink')" class="bottom-nav-btn flex flex-col items-center justify-center w-1/2 py-1 text-gray-400 transition">
                 <div class="text-xl mb-0.5">
                     <i class="fa-solid fa-coins"></i>
                 </div>
@@ -257,13 +275,13 @@
         </div>
     </nav>
 
-    <!-- SCRIPT LOGIC & ĐỒNG HỒ ĐẾM NGƯỢC -->
+    <!-- SCRIPT LOGIC MẠNH MẼ -->
     <script>
         let userDB = {};
         let currentIpUsage = 0;
-        let activeUser = ""; // Mặc định chưa có tên người nhận
+        let activeUser = "";
 
-        // Chuyển Tab (Shop <-> Getlink)
+        // Chuyển Tab siêu mượt
         function switchTab(tabName) {
             const shopSection = document.getElementById('sectionShop');
             const getlinkSection = document.getElementById('sectionGetlink');
@@ -281,7 +299,7 @@
                 topTabGetlink.classList.remove('active');
                 bottomNavShop.classList.add('active');
                 bottomNavGetlink.classList.remove('active');
-            } else {
+            } else if (tabName === 'getlink') {
                 shopSection.classList.add('hidden');
                 getlinkSection.classList.remove('hidden');
 
@@ -302,7 +320,7 @@
             }
         }
 
-        // Cập nhật giao diện khi đổi ID
+        // Cập nhật giao diện
         function updateUI() {
             const usernameDisplay = document.getElementById('activeUsername');
             const headerPoints = document.getElementById('headerPoints');
@@ -336,7 +354,7 @@
             document.getElementById('ipCounter').innerText = `${currentIpUsage} / 2 Lượt`;
             updateUI();
 
-            alert(`✅ Đã mở link Gtraffic cho '${activeUser}'.\nHoàn thành lượt vượt thành công $\rightarrow$ Cộng +5 Điểm!`);
+            alert(`✅ Đã mở link Gtraffic cho '${activeUser}'.\nHoàn thành lượt vượt thành công -> Cộng +5 Điểm!`);
         }
 
         // Đổi quà
@@ -360,26 +378,11 @@
             alert(`🎉 ĐỔI QUÀ THÀNH CÔNG!\nĐã tạo đơn nhận '${itemName}' cho tài khoản '${activeUser}'. Admin sẽ vào game kết bạn & trao quà cho bạn sớm nhất!`);
         }
 
-        // ĐỒNG HỒ ĐẾM NGƯỢC
+        // ĐỒNG HỒ ĐẾM NGƯỢC THỜI GIAN THỰC
         function startTimers() {
             setInterval(() => {
                 const now = new Date();
 
-                // 1. Đếm ngược tới 00:00:00 ngày tiếp theo (Làm mới hàng ngày)
+                // 1. Đếm ngược 00:00:00 ngày tiếp theo
                 const tomorrow = new Date(now);
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                tomorrow.setHours(0, 0, 0, 0);
-
-                const diffDaily = tomorrow - now;
-                const dHours = Math.floor((diffDaily / (1000 * 60 * 60)) % 24);
-                const dMinutes = Math.floor((diffDaily / 1000 / 60) % 60);
-                const dSeconds = Math.floor((diffDaily / 1000) % 60);
-
-                document.getElementById('dailyHours').innerText = String(dHours).padStart(2, '0');
-                document.getElementById('dailyMinutes').innerText = String(dMinutes).padStart(2, '0');
-                document.getElementById('dailySeconds').innerText = String(dSeconds).padStart(2, '0');
-
-                // 2. Đếm ngược tới 00:00:00 Thứ 2 tuần sau (Reset điểm tuần)
-                const nextMonday = new Date(now);
-                const dayOfWeek = now.getDay();
-                const daysUntilMonday = ((8 - dayOfW
+             
