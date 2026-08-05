@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhiệm Vụ Vượt Link Nhận Quà</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; }
+        .nav-tab-btn.active { color: #38bdf8; border-bottom: 2px solid #38bdf8; font-weight: bold; }
+        .bottom-nav-btn.active { color: #38bdf8; }
+        .modal { display: none; }
+        .modal.active { display: flex; }
+    </style>
+</head>
+<body class="pb-20">
+
+    <!-- HEADER -->
+    <header class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-40">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <span id="activeUsername" class="font-bold text-sm text-slate-100">Chưa đăng nhập</span>
+                        <span id="roleBadge" class="hidden text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded font-bold">ADMIN</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Số dư: <span id="headerPoints" class="text-emerald-400 font-bold">0 ĐC</span></p>
+                </div>
+            </div>
+            <button onclick="handleBottomAuth()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded-lg border border-slate-600 font-semibold transition">
+                <i class="fa-solid fa-right-to-bracket mr-1"></i> Tài khoản
+            </button>
+        </div>
+    </header>
+
+    <!-- NAV TABS TOP -->
+    <div class="bg-slate-800/80 backdrop-blur border-b border-slate-700/50 sticky top-[69px] z-30">
+        <div class="max-w-md mx-auto flex text-center text-sm font-medium">
+            <button id="topTabShop" onclick="switchTab('shop')" class="nav-tab-btn flex-1 py-2.5 text-gray-400 active">
+                <i class="fa-solid fa-store mr-1"></i> Cửa hàng
+            </button>
+            <button id="topTabGetlink" onclick="switchTab('getlink')" class="nav-tab-btn flex-1 py-2.5 text-gray-400">
+                <i class="fa-solid fa-link mr-1"></i> Nhiệm vụ
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-md mx-auto p-4 space-y-4">
+
+        <!-- SECTION 1: CỬA HÀNG (SHOP) -->
+        <section id="sectionShop" class="space-y-4">
+            <!-- Ô NHẬP TÊN ROBLOX NHẬN QUÀ -->
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-lg space-y-2">
+                <label class="block text-xs font-semibold text-slate-300">
+                    <i class="fa-solid fa-gamepad text-indigo-400 mr-1"></i> Tên Roblox nhận quà:
+                </label>
+                <div class="flex gap-2">
+                    <input type="text" id="robloxRecipientInput" placeholder="Nhập Username Roblox..." class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    <button onclick="confirmRecipientName()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg font-bold transition">
+                        Lưu
+                    </button>
+                </div>
+            </div>
+
+            <!-- DANH SÁCH SẢN PHẨM -->
+            <div class="grid grid-cols-2 gap-3">
+                <!-- Item 1 -->
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-3 flex flex-col justify-between shadow">
+                    <div>
+                        <div class="h-24 bg-slate-900 rounded-lg flex items-center justify-center text-3xl mb-2 text-amber-400">
+                            <i class="fa-solid fa-coins"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-100">100 Robux</h4>
+                        <p class="text-xs text-emerald-400 font-semibold mb-2">10 Điểm Cương</p>
+                    </div>
+                    <button onclick="redeemItem('100 Robux', 10)" class="w-full bg-slate-700 hover:bg-emerald-600 text-white text-xs font-bold py-2 rounded-lg transition">
+                        Đổi ngay
+                    </button>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-3 flex flex-col justify-between shadow">
+                    <div>
+                        <div class="h-24 bg-slate-900 rounded-lg flex items-center justify-center text-3xl mb-2 text-indigo-400">
+                            <i class="fa-solid fa-gem"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-100">500 Robux</h4>
+                        <p class="text-xs text-emerald-400 font-semibold mb-2">45 Điểm Cương</p>
+                    </div>
+                    <button onclick="redeemItem('500 Robux', 45)" class="w-full bg-slate-700 hover:bg-emerald-600 text-white text-xs font-bold py-2 rounded-lg transition">
+                        Đổi ngay
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: VƯỢT LINK (GETLINK) -->
+        <section id="sectionGetlink" class="space-y-4 hidden">
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-lg space-y-3">
+                <div class="flex justify-between items-center text-xs text-slate-400 border-b border-slate-700/60 pb-2">
+                    <span>Lượt vượt trong ngày:</span>
+                    <span id="ipCounter" class="font-bold text-amber-400 text-sm">0 / 2</span>
+                </div>
+
+                <!-- ĐẾM NGƯỢC THỜI GIAN RESET -->
+                <div class="text-center py-2 bg-slate-900/50 rounded-lg border border-slate-700/50">
+                    <p class="text-[11px] text-slate-400 mb-1">Thời gian làm mới lượt (00:00 VN):</p>
+                    <div class="font-mono text-sm font-bold text-indigo-400 flex justify-center gap-1">
+                        <span id="dailyHours">00</span>:
+                        <span id="dailyMinutes">00</span>:
+                        <span id="dailySeconds">00</span>
+                    </div>
+                </div>
+
+                <!-- NÚT VƯỢT LINK -->
+                <button onclick="startGtrafficTask()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-bolt"></i> VƯỢT LINK (+5 Điểm)
+                </button>
+            </div>
+        </section>
+
+        <!-- ADMIN LOG PANEL -->
+        <section id="adminLogPanel" class="bg-slate-800 border border-red-500/30 rounded-xl p-4 shadow-lg space-y-3 hidden">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xs font-bold text-red-400 uppercase tracking-wider">
+                    <i class="fa-solid fa-shield-halved mr-1"></i> Nhật ký hệ thống (Admin)
+                </h3>
+                <button onclick="clearLogs()" class="text-[10px] bg-red-900/50 hover:bg-red-800 text-red-200 px-2 py-1 rounded">Xóa log</button>
+            </div>
+            <div class="max-h-48 overflow-y-auto border border-slate-700 rounded-lg bg-slate-900 p-2 text-xs">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-slate-500 border-b border-slate-800">
+                            <th class="pb-1">Giờ</th>
+                            <th class="pb-1">User</th>
+                            <th class="pb-1">Tên Roblox</th>
+                            <th class="pb-1">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logBody" class="divide-y divide-slate-800/50">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 z-40">
+        <div class="max-w-md mx-auto flex justify-around text-xs py-2">
+            <button id="bottomNavShop" onclick="switchTab('shop')" class="bottom-nav-btn flex flex-col items-center w-1/3 text-gray-400 active">
+                <i class="fa-solid fa-store text-base mb-0.5"></i>
+                <span>Shop</span>
+            </button>
+            <button id="bottomNavGetlink" onclick="switchTab('getlink')" class="bottom-nav-btn flex flex-col items-center w-1/3 text-gray-400">
+                <i class="fa-solid fa-link text-base mb-0.5"></i>
+                <span>Nhiệm vụ</span>
+            </button>
+            <button onclick="handleBottomAuth()" class="bottom-nav-btn flex flex-col items-center w-1/3 text-gray-400">
+                <i class="fa-solid fa-user-gear text-base mb-0.5"></i>
+                <span id="bottomUserName">Tài khoản</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MODAL ĐĂNG NHẬP / ĐĂNG KÝ -->
+    <div id="authOverlay" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-50 items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-xs rounded-2xl p-5 space-y-4 shadow-2xl relative">
+            <button onclick="closeAuth()" class="absolute top-3 right-3 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            
+            <h3 id="authTitle" class="text-lg font-bold text-center text-white">Đăng nhập</h3>
+
+            <div id="authError" class="hidden text-xs bg-red-500/20 border border-red-500/50 text-red-300 p-2 rounded text-center"></div>
+
+            <div class="space-y-3">
+                <input type="text" id="authUser" placeholder="Tên tài khoản..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                <input type="password" id="authPass" placeholder="Mật khẩu..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                
+                <button id="authSubmitBtn" onclick="handleLogin()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-lg text-sm transition">
+                    Đăng nhập
+                </button>
+            </div>
+
+            <div class="text-center text-xs text-slate-400">
+                <span id="authSwitchText">Chưa có tài khoản?</span>
+                <button id="authSwitchBtn" onclick="toggleAuthMode()" class="text-indigo-400 font-bold ml-1 hover:underline">Đăng ký</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // --- CẤU HÌNH GỐC ---
+        const BASE_DESTINATION_URL = "https://www.example.com/go"; // Trang đích cuối cùng (khi vượt xong)
+        const ADMIN_USER = "ronnei.htk7";
+        const ADMIN_PASS = "icloucom12";
+        const GTRAFFIC_API_KEY = "54ed5096b0af4edc8c5dd31dfb5b2502";
+
+        // Biến hệ thống
+        let userDB = {}, activeUser = "", logHistory = [], currentIpUsage = 0, lastUpdateDate = "", currentRole = "user", isLoginMode = true;
+
+        // --- HÀM KHỞI TẠO HỆ THỐNG ---
+        function initSystem() {
+            try {
+                let e = localStorage.getItem("gardenUserDB");
+                if (e) userDB = JSON.parse(e);
+                if (!userDB || typeof userDB !== "object" || Array.isArray(userDB)) userDB = {};
+                activeUser = localStorage.getItem("gardenActiveUser") || "";
+                let t = localStorage.getItem("gardenLogHistory");
+                if (t) logHistory = JSON.parse(t);
+                if (!Array.isArray(logHistory)) logHistory = [];
+                currentIpUsage = parseInt(localStorage.getItem("gardenIpUsage")) || 0;
+                lastUpdateDate = localStorage.getItem("gardenLastDate") || "";
+            } catch (e) { userDB = {}; logHistory = []; activeUser = ""; }
+
+            userDB[ADMIN_USER] = { password: ADMIN_PASS, points: userDB[ADMIN_USER]?.points || 0, role: "admin", recipient: userDB[ADMIN_USER]?.recipient || "" };
+            Object.keys(userDB).forEach(e => {
+                if (typeof userDB[e] === "string") userDB[e] = { password: userDB[e], points: 0, role: "user", recipient: "" };
+                if (!userDB[e].points) userDB[e].points = 0;
+                if (!userDB[e].role) userDB[e].role = "user";
+                if (!userDB[e].recipient) userDB[e].recipient = "";
+            });
+
+            if (activeUser && userDB[activeUser]) {
+                currentRole = userDB[activeUser].role || "user";
+            } else { activeUser = ""; }
+            saveData();
+        }
+
+        function saveData() {
+            localStorage.setItem("gardenUserDB", JSON.stringify(userDB));
+            localStorage.setItem("gardenActiveUser", activeUser);
+            localStorage.setItem("gardenIpUsage", currentIpUsage.toString());
+            localStorage.setItem("gardenLastDate", lastUpdateDate);
+            localStorage.setItem("gardenLogHistory", JSON.stringify(logHistory));
+        }
+
+        function checkDailyReset() {
+            if (new Date().toDateString() !== lastUpdateDate) {
+                currentIpUsage = 0;
+                lastUpdateDate = new Date().toDateString();
+                saveData();
+            }
+        }
+
+        // --- ĐỊNH DANH THIẾT BỊ (DEVICE ID) ---
+        function getOrCreateDeviceID() {
+            let deviceId = localStorage.getItem("gardenDeviceID");
+            if (!deviceId) {
+                deviceId = 'dev_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
+                localStorage.setItem("gardenDeviceID", deviceId);
+            }
+            return deviceId;
+        }
+
+        // --- QUẢN LÝ TÊN NHẬN QUÀ ROBLOX ---
+        function confirmRecipientName() {
+            if (!activeUser) { alert("⚠️ Bạn cần đăng nhập tài khoản trước!"); openAuth(); return; }
+            const val = document.getElementById("robloxRecipientInput").value.trim();
+            if (!val) { alert("⚠️ Vui lòng nhập Tên Roblox nhận quà!"); return; }
+            userDB[activeUser].recipient = val;
+            saveData();
+            alert(`✅ Đã lưu tên nhận quà Roblox: "${val}"`);
+        }
+
+        // --- LOG HOẠT ĐỘNG (DÀNH CHO ADMIN) ---
+        function addLog(username, action, recipient = "-", points = 0) {
+            let timeStr = new Date().toLocaleTimeString("vi-VN", { hour12: false });
+            logHistory.unshift({ time: timeStr, username: username, recipient: recipient, action: action, points: points });
+            if (logHistory.length > 100) logHistory.pop();
+            saveData();
+            renderLogs();
+        }
+
+        function renderLogs() {
+            const e = document.getElementById("logBody");
+            if (!e) return;
+            e.innerHTML = "";
+            logHistory.forEach(t => {
+                let color = t.action.includes("Vượt") ? "text-emerald-400" : "text-amber-400 font-bold";
+                e.innerHTML += `<tr>
+                    <td class="text-gray-500">${t.time}</td>
+                    <td class="font-semibold text-white">${t.username}</td>
+                    <td class="text-amber-300 font-bold">${t.recipient || '-'}</td>
+                    <td class="${color}">${t.action} (${t.points > 0 ? '+' : ''}${t.points}Đ)</td>
+                </tr>`;
+            });
+        }
+
+        function clearLogs() {
+            if (currentRole !== "admin") return;
+            if (confirm("Xóa toàn bộ log?")) { logHistory = []; saveData(); renderLogs(); }
+        }
+
+        // --- ĐĂNG NHẬP / ĐĂNG KÝ (AUTH) ---
+        function openAuth() { document.getElementById("authOverlay").classList.add("active"); }
+        function closeAuth() { document.getElementById("authOverlay").classList.remove("active"); }
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            document.getElementById("authTitle").innerText = isLoginMode ? "Đăng nhập" : "Đăng ký";
+            document.getElementById("authSubmitBtn").innerText = isLoginMode ? "Đăng nhập" : "Đăng ký";
+            document.getElementById("authSwitchText").innerText = isLoginMode ? "Chưa có tài khoản?" : "Đã có tài khoản?";
+            document.getElementById("authSwitchBtn").innerText = isLoginMode ? "Đăng ký" : "Đăng nhập";
+        }
+
+        function handleLogin() {
+            const userVal = document.getElementById("authUser").value.trim();
+            const passVal = document.getElementById("authPass").value.trim();
+            const errDiv = document.getElementById("authError");
+            if (!userVal || !passVal) return;
+
+            if (isLoginMode) {
+                if (!userDB[userVal] || userDB[userVal].password !== passVal) {
+                    errDiv.innerText = "Sai tài khoản hoặc mật khẩu"; errDiv.classList.remove("hidden"); return;
+                }
+                activeUser = userVal;
+                currentRole = userDB[userVal].role || "user";
+            } else {
+                if (userDB[userVal] || userVal === ADMIN_USER) {
+                    errDiv.innerText = "Tài khoản đã tồn tại"; errDiv.classList.remove("hidden"); return;
+                }
+                userDB[userVal] = { password: passVal, points: 0, role: "user", recipient: "" };
+                activeUser = userVal;
+                currentRole = "user";
+            }
+            saveData(); updateUI(); closeAuth();
+        }
+
+        function handleBottomAuth() { activeUser ? logout() : openAuth(); }
+        function logout() { if (confirm("Đăng xuất?")) { activeUser = ""; currentRole = "user"; saveData(); updateUI(); } }
+
+        // --- GIAO DIỆN & TABS ---
+        function switchTab(tab) {
+            document.getElementById("sectionShop").classList.toggle("hidden", tab !== "shop");
+            document.getElementById("sectionGetlink").classList.toggle("hidden", tab !== "getlink");
+            document.getElementById("topTabShop").className = `nav-tab-btn flex-1 py-2.5 text-gray-400 ${tab === "shop" ? "active" : ""}`;
+            document.getElementById("topTabGetlink").className = `nav-tab-btn flex-1 py-2.5 text-gray-400 ${tab === "getlink" ? "active" : ""}`;
+            document.getElementById("bottomNavShop").className = `bottom-nav-btn flex flex-col items-center w-1/3 text-gray-400 ${tab === "shop" ? "active" : ""}`;
+            document.getElementById("bottomNavGetlink").className = `bottom-nav-btn flex flex-col items-center w-1/3 text-gray-400 ${tab === "getlink" ? "active" : ""}`;
+        }
+
+        function updateUI() {
+            const uTxt = document.getElementById("activeUsername"), pTxt = document.getElementById("headerPoints");
+            const rBadge = document.getElementById("roleBadge"), lPanel = document.getElementById("adminLogPanel");
+            const bTxt = document.getElementById("bottomUserName");
+            const recipientInput = document.getElementById("robloxRecipientInput");
+
+            if (activeUser && userDB[activeUser]) {
+                uTxt.innerText = activeUser;
+                pTxt.innerText = `${userDB[activeUser].points || 0} ĐC`;
+                bTxt.innerText = activeUser;
+                recipientInput.value = userDB[activeUser].recipient || "";
+                
+                if (currentRole === "admin") { rBadge.classList.remove("hidden"); lPanel.classList.remove("hidden"); renderLogs(); }
+                else { rBadge.classList.add("hidden"); lPanel.classList.add("hidden"); }
+            } else {
+                uTxt.innerText = "Chưa đăng nhập"; pTxt.innerText = "0 ĐC";
+                rBadge.classList.add("hidden"); lPanel.classList.add("hidden"); bTxt.innerText = "Đăng nhập";
+                recipientInput.value = "";
+            }
+            document.getElementById("ipCounter").innerText = `${currentIpUsage} / 2`;
+        }
+
+        // --- XỬ LÝ NHIỆM VỤ VƯỢT LINK (GỌI API GTRAFFIC THẬT) ---
+        async function startGtrafficTask() {
+            if (!activeUser) { openAuth(); return; }
+            if (currentIpUsage >= 2) { alert("⚠️ IP mạng của bạn đã hết 2 lượt hôm nay!"); return; }
+
+            const deviceId = getOrCreateDeviceID();
+            const longUniqueUrl = `${BASE_DESTINATION_URL}?user=${encodeURIComponent(activeUser)}&device=${encodeURIComponent(deviceId)}&t=${Date.now()}`;
+            const apiUrl = `https://manager.gtraffic.io/api/cong-khai/tao-lien-ket?apikey=${GTRAFFIC_API_KEY}&url=${encodeURIComponent(longUniqueUrl)}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                const shortUrl = data.shortlink || data.url || data.result || data.link || data.data;
+
+                if (shortUrl) {
+                    window.open(shortUrl, "_blank");
+
+                    userDB[activeUser].points = (userDB[activeUser].points || 0) + 5;
+                    currentIpUsage++;
+                    saveData();
+                    updateUI();
+                    addLog(activeUser, "Vượt Link Gtraffic (Link riêng)", "-", 5);
+                } else {
+                    alert("❌ Lỗi từ Gtraffic: " + (data.message || "Không thể tạo link rút gọn!"));
+                }
+            } catch (error) {
+                console.error("Lỗi kết nối Gtraffic API:", error);
+                alert("❌ Lỗi kết nối máy chủ Gtraffic, vui lòng thử lại sau!");
+            }
+        }
+
+        // --- XỬ LÝ ĐỔI QUÀ ---
+        function redeemItem(name, cost) {
+            if (!activeUser) { openAuth(); return; }
+            const recipient = userDB[activeUser]?.recipient?.trim();
+            
+            if (!recipient) {
+                alert("⚠️ Vui lòng nhập Tên Roblox nhận quà và bấm nút 'Lưu' trước khi đổi!");
+                document.getElementById("robloxRecipientInput").focus();
+                return;
+            }
+
+            if ((userDB[activeUser]?.points || 0) < cost) { alert("Không đủ điểm!"); return; }
+            
+            userDB[activeUser].points -= cost;
+            saveData(); updateUI(); 
+            addLog(activeUser, `Đổi ${name}`, recipient, -cost);
+            alert(`🎉 Đã tạo đơn nhận '${name}' thành công cho Roblox ID: '${recipient}'!`);
+        }
+
+        // --- BỘ ĐẾM NGƯỢC GIỜ VIỆT NAM ---
+        function updateVNCountdown() {
+            const now = new Date();
+            const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const vnTime = new Date(utcTime + (7 * 3600000));
+            
+            const nextMidnight = new Date(vnTime);
+            nextMidnight.setHours(24, 0, 0, 0);
+
+            let diff = nextMidnight.getTime() - vnTime.getTime();
+            if (diff <= 0) diff = 0;
+
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+
+            document.getElementById("dailyHours").innerText = String(h).padStart(2, "0");
+            document.getElementById("dailyMinutes").innerText = String(m).padStart(2, "0");
+            document.getElementById("dailySeconds").innerText = String(s).padStart(2, "0");
+        }
+
+        // KHỞI CHẠY HỆ THỐNG
+        initSystem(); checkDailyReset(); updateUI();
+        setInterval(updateVNCountdown, 1000);
+        updateVNCountdown();
+    </script>
+</body>
+</html>
