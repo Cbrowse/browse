@@ -2,199 +2,225 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nhiệm Vụ Vượt Link Nhận Quà</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Garden Rewards</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; }
-        .nav-tab-btn.active { color: #38bdf8; border-bottom: 2px solid #38bdf8; font-weight: bold; }
-        .bottom-nav-btn.active { color: #38bdf8; }
-        .modal { display: none; }
-        .modal.active { display: flex; }
+        * { -webkit-tap-highlight-color: transparent; }
+        body { background-color: #0b0f19; color: #f3f4f6; font-family: system-ui, sans-serif; margin: 0; padding: 0; padding-bottom: 80px; }
+        .glow-card { background: rgba(17,24,39,.85); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; }
+        .nav-tab-btn.active { color: #10b981!important; border-bottom: 3px solid #10b981!important; }
+        .bottom-nav-btn.active { color: #10b981!important; }
+        .item-img-box { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: rgba(15,23,42,.6); border: 1px solid rgba(255,255,255,.1); overflow: hidden; flex-shrink: 0; }
+        .item-img-box img { width: 100%; height: 100%; object-fit: contain; display: block; }
+        #authOverlay { position: fixed; inset: 0; background: rgba(0,0,0,.85); display: none; align-items: center; justify-content: center; z-index: 9999; }
+        #authOverlay.active { display: flex; }
+        .auth-box { background: #1f2937; padding: 25px; border-radius: 20px; width: 90%; max-width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,.8); border: 1px solid #374151; }
+        .auth-input { width: 100%; background: #111827; border: 1px solid #374151; padding: 12px 15px; border-radius: 12px; color: #fff; font-size: 15px; outline: 0; margin-bottom: 12px; box-sizing: border-box; }
+        .auth-input:focus { border-color: #10b981; }
+        .auth-btn { width: 100%; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 15px; border: none; cursor: pointer; }
+        .log-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+        .log-table th { text-align: left; padding: 6px; background: #1e293b; color: #94a3b8; font-weight: 600; border-bottom: 1px solid #334155; }
+        .log-table td { padding: 6px; border-bottom: 1px solid #1e293b; color: #cbd5e1; vertical-align: middle; }
+        .log-wrap { max-height: 250px; overflow-y: auto; }
+        button { cursor: pointer; touch-action: manipulation; }
     </style>
 </head>
-<body class="pb-20">
+<body>
+
+    <!-- OVERLAY ĐĂNG NHẬP / ĐĂNG KÝ -->
+    <div id="authOverlay">
+        <div class="auth-box">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-white font-bold text-lg" id="authTitle">Đăng nhập</h3>
+                <button onclick="closeAuth()" class="text-gray-400 hover:text-white text-xl bg-transparent border-none">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <input type="text" id="authUser" class="auth-input" placeholder="Tên đăng nhập web">
+            <input type="password" id="authPass" class="auth-input" placeholder="Mật khẩu">
+            <button onclick="handleLogin()" id="authSubmitBtn" class="auth-btn bg-emerald-600 text-white">Đăng nhập</button>
+            <div class="text-center mt-3 text-sm text-gray-400">
+                <span id="authSwitchText">Chưa có tài khoản?</span>
+                <button onclick="toggleAuthMode()" id="authSwitchBtn" class="text-emerald-400 font-semibold ml-1 bg-transparent border-none">Đăng ký</button>
+            </div>
+            <div id="authError" class="text-red-400 text-center text-sm mt-2 hidden"></div>
+        </div>
+    </div>
 
     <!-- HEADER -->
-    <header class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-40">
+    <header class="w-full border-b border-gray-800 bg-gray-900/90 sticky top-0 z-40 backdrop-blur-md px-4 py-3">
         <div class="max-w-md mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <div class="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white">
-                    <i class="fa-solid fa-user"></i>
-                </div>
+            <div class="flex items-center space-x-2">
+                <span class="text-2xl">🌱</span>
                 <div>
-                    <div class="flex items-center gap-1.5">
-                        <span id="activeUsername" class="font-bold text-sm text-slate-100">Chưa đăng nhập</span>
-                        <span id="roleBadge" class="hidden text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded font-bold">ADMIN</span>
-                    </div>
-                    <p class="text-xs text-slate-400">Số dư: <span id="headerPoints" class="text-emerald-400 font-bold">0 ĐC</span></p>
+                    <h1 class="font-black text-base text-emerald-400 leading-none">GARDEN SHOP</h1>
+                    <span class="text-[10px] text-gray-400">Grow a Garden 2</span>
                 </div>
             </div>
-            <button onclick="handleBottomAuth()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded-lg border border-slate-600 font-semibold transition">
-                <i class="fa-solid fa-right-to-bracket mr-1"></i> Tài khoản
+            <div class="bg-gray-800/90 border border-gray-700 px-3 py-1.5 rounded-full flex items-center space-x-1.5">
+                <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
+                <span id="headerPoints" class="text-xs font-bold text-amber-400">0 ĐC</span>
+            </div>
+        </div>
+        <div class="max-w-md mx-auto flex border-t border-gray-800/60 mt-3 pt-1 text-center font-bold text-xs">
+            <button onclick="switchTab('shop')" class="nav-tab-btn active flex-1 py-2.5 text-gray-400" id="topTabShop">
+                <i class="fa-solid fa-store text-base"></i> Cửa Hàng
+            </button>
+            <button onclick="switchTab('getlink')" class="nav-tab-btn flex-1 py-2.5 text-gray-400" id="topTabGetlink">
+                <i class="fa-solid fa-coins text-base"></i> Nhiệm Vụ
             </button>
         </div>
     </header>
 
-    <!-- NAV TABS TOP -->
-    <div class="bg-slate-800/80 backdrop-blur border-b border-slate-700/50 sticky top-[69px] z-30">
-        <div class="max-w-md mx-auto flex text-center text-sm font-medium">
-            <button id="topTabShop" onclick="switchTab('shop')" class="nav-tab-btn flex-1 py-2.5 text-gray-400 active">
-                <i class="fa-solid fa-store mr-1"></i> Cửa hàng
-            </button>
-            <button id="topTabGetlink" onclick="switchTab('getlink')" class="nav-tab-btn flex-1 py-2.5 text-gray-400">
-                <i class="fa-solid fa-link mr-1"></i> Nhiệm vụ
-            </button>
+    <!-- MAIN CONTENT -->
+    <main class="max-w-md w-full mx-auto px-4 mt-4 flex-1 space-y-4">
+        
+        <!-- KHUNG THÔNG TIN TÀI KHOẢN & TÊN ROBLOX NHẬN QUÀ -->
+        <div class="glow-card p-3.5 rounded-2xl border-emerald-500/30 bg-emerald-950/20 space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="text-[10px] text-gray-400 uppercase font-semibold">TÀI KHOẢN WEB:</span>
+                            <span id="roleBadge" class="text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 px-1.5 py-0.2 rounded font-bold hidden">ADMIN</span>
+                        </div>
+                        <span id="activeUsername" class="text-xs font-bold text-white">Chưa đăng nhập</span>
+                    </div>
+                </div>
+                <button onclick="handleBottomAuth()" class="text-[11px] bg-emerald-600/30 text-emerald-300 font-bold px-3 py-1.5 rounded-lg border border-emerald-500/30">Tài khoản</button>
+            </div>
+
+            <!-- PHẦN NHẬP TÊN NGƯỜI NHẬN VỚI NÚT XÁC NHẬN -->
+            <div class="border-t border-gray-800/80 pt-2.5 flex items-center justify-between">
+                <div class="text-[11px] font-bold text-amber-400 flex items-center">
+                    <i class="fa-solid fa-gift mr-1.5"></i>Roblox nhận quà:
+                </div>
+                <div class="flex items-center space-x-1.5">
+                    <input type="text" id="robloxRecipientInput" 
+                           placeholder="Chưa có tên người nhận" 
+                           class="bg-gray-900/90 border border-amber-500/30 rounded-lg px-2.5 py-1 text-xs text-white font-semibold focus:outline-none focus:border-amber-400 w-36 text-right">
+                    <button onclick="confirmRecipientName()" class="bg-amber-500 hover:bg-amber-400 text-gray-950 font-bold text-xs px-2.5 py-1 rounded-lg border-none active:scale-95 transition">Lưu</button>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <!-- MAIN CONTENT CONTAINER -->
-    <main class="max-w-md mx-auto p-4 space-y-4">
-
-        <!-- SECTION 1: CỬA HÀNG (SHOP) -->
-        <section id="sectionShop" class="space-y-4">
-            <!-- Ô NHẬP TÊN ROBLOX NHẬN QUÀ -->
-            <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-lg space-y-2">
-                <label class="block text-xs font-semibold text-slate-300">
-                    <i class="fa-solid fa-gamepad text-indigo-400 mr-1"></i> Tên Roblox nhận quà:
-                </label>
-                <div class="flex gap-2">
-                    <input type="text" id="robloxRecipientInput" placeholder="Nhập Username Roblox..." class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
-                    <button onclick="confirmRecipientName()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg font-bold transition">
-                        Lưu
-                    </button>
-                </div>
+        <!-- BẢNG LOG DÀNH CHO ADMIN -->
+        <div id="adminLogPanel" class="glow-card p-4 rounded-2xl border-gray-700/50 mt-4 hidden">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] font-bold text-gray-400 uppercase"><i class="fa-regular fa-clipboard mr-2 text-emerald-400"></i>LỊCH SỬ ĐỔI QUÀ & HOẠT ĐỘNG</span>
+                <button onclick="clearLogs()" class="text-[10px] text-red-500 hover:underline bg-transparent border-none">Xóa log</button>
             </div>
-
-            <!-- DANH SÁCH SẢN PHẨM -->
-            <div class="grid grid-cols-2 gap-3">
-                <!-- Item 1 -->
-                <div class="bg-slate-800 border border-slate-700 rounded-xl p-3 flex flex-col justify-between shadow">
-                    <div>
-                        <div class="h-24 bg-slate-900 rounded-lg flex items-center justify-center text-3xl mb-2 text-amber-400">
-                            <i class="fa-solid fa-coins"></i>
-                        </div>
-                        <h4 class="font-bold text-sm text-slate-100">100 Robux</h4>
-                        <p class="text-xs text-emerald-400 font-semibold mb-2">10 Điểm Cương</p>
-                    </div>
-                    <button onclick="redeemItem('100 Robux', 10)" class="w-full bg-slate-700 hover:bg-emerald-600 text-white text-xs font-bold py-2 rounded-lg transition">
-                        Đổi ngay
-                    </button>
-                </div>
-
-                <!-- Item 2 -->
-                <div class="bg-slate-800 border border-slate-700 rounded-xl p-3 flex flex-col justify-between shadow">
-                    <div>
-                        <div class="h-24 bg-slate-900 rounded-lg flex items-center justify-center text-3xl mb-2 text-indigo-400">
-                            <i class="fa-solid fa-gem"></i>
-                        </div>
-                        <h4 class="font-bold text-sm text-slate-100">500 Robux</h4>
-                        <p class="text-xs text-emerald-400 font-semibold mb-2">45 Điểm Cương</p>
-                    </div>
-                    <button onclick="redeemItem('500 Robux', 45)" class="w-full bg-slate-700 hover:bg-emerald-600 text-white text-xs font-bold py-2 rounded-lg transition">
-                        Đổi ngay
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- SECTION 2: VƯỢT LINK (GETLINK) -->
-        <section id="sectionGetlink" class="space-y-4 hidden">
-            <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-lg space-y-3">
-                <div class="flex justify-between items-center text-xs text-slate-400 border-b border-slate-700/60 pb-2">
-                    <span>Lượt vượt trong ngày:</span>
-                    <span id="ipCounter" class="font-bold text-amber-400 text-sm">0 / 2</span>
-                </div>
-
-                <!-- ĐẾM NGƯỢC THỜI GIAN RESET -->
-                <div class="text-center py-2 bg-slate-900/50 rounded-lg border border-slate-700/50">
-                    <p class="text-[11px] text-slate-400 mb-1">Thời gian làm mới lượt (00:00 VN):</p>
-                    <div class="font-mono text-sm font-bold text-indigo-400 flex justify-center gap-1">
-                        <span id="dailyHours">00</span>:
-                        <span id="dailyMinutes">00</span>:
-                        <span id="dailySeconds">00</span>
-                    </div>
-                </div>
-
-                <!-- NÚT VƯỢT LINK -->
-                <button onclick="startGtrafficTask()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-bolt"></i> VƯỢT LINK (+5 Điểm)
-                </button>
-            </div>
-        </section>
-
-        <!-- ADMIN LOG PANEL -->
-        <section id="adminLogPanel" class="bg-slate-800 border border-red-500/30 rounded-xl p-4 shadow-lg space-y-3 hidden">
-            <div class="flex justify-between items-center">
-                <h3 class="text-xs font-bold text-red-400 uppercase tracking-wider">
-                    <i class="fa-solid fa-shield-halved mr-1"></i> Nhật ký hệ thống (Admin)
-                </h3>
-                <button onclick="clearLogs()" class="text-[10px] bg-red-900/50 hover:bg-red-800 text-red-200 px-2 py-1 rounded">Xóa log</button>
-            </div>
-            <div class="max-h-48 overflow-y-auto border border-slate-700 rounded-lg bg-slate-900 p-2 text-xs">
-                <table class="w-full text-left">
+            <div class="log-wrap" id="logContainer">
+                <table class="log-table">
                     <thead>
-                        <tr class="text-slate-500 border-b border-slate-800">
-                            <th class="pb-1">Giờ</th>
-                            <th class="pb-1">User</th>
-                            <th class="pb-1">Tên Roblox</th>
-                            <th class="pb-1">Hành động</th>
+                        <tr>
+                            <th>Giờ</th>
+                            <th>Tài khoản</th>
+                            <th>Tên Roblox Nhận</th>
+                            <th>Vật phẩm / Hành động</th>
                         </tr>
                     </thead>
-                    <tbody id="logBody" class="divide-y divide-slate-800/50">
-                    </tbody>
+                    <tbody id="logBody"></tbody>
                 </table>
             </div>
+        </div>
+
+        <!-- SECTION SHOP -->
+        <section id="sectionShop" class="space-y-4">
+            
+            <!-- DANH MỤC 1: GROW A GARDEN 2 -->
+            <div class="flex items-center justify-between">
+                <h2 class="text-xs font-bold text-gray-300 uppercase"><i class="fa-solid fa-seedling text-emerald-400 mr-2"></i>GROW A GARDEN 2</h2>
+            </div>
+            <div class="glow-card p-4 rounded-2xl flex items-center justify-between">
+                <div class="flex items-center space-x-3.5">
+                    <div class="item-img-box"><img src="https://thumbsnap.com/i/jvbvSUcZ.jpg" alt="Can"></div>
+                    <div>
+                        <h3 class="font-bold text-sm text-white">Super Watering Can</h3>
+                        <span class="inline-block mt-1 text-xs font-extrabold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded">5 Điểm</span>
+                    </div>
+                </div>
+                <button onclick="redeemItem('Super Watering Can',5)" class="bg-emerald-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl border-none active:scale-95">Đổi Quà</button>
+            </div>
+            <div class="glow-card p-4 rounded-2xl flex items-center justify-between">
+                <div class="flex items-center space-x-3.5">
+                    <div class="item-img-box"><img src="https://thumbsnap.com/i/dXdSNpk5.jpg" alt="Sprinkler"></div>
+                    <div>
+                        <h3 class="font-bold text-sm text-white">Super Sprinkler</h3>
+                        <span class="inline-block mt-1 text-xs font-extrabold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded">5 Điểm</span>
+                    </div>
+                </div>
+                <button onclick="redeemItem('Super Sprinkler',5)" class="bg-emerald-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl border-none active:scale-95">Đổi Quà</button>
+            </div>
+            <div class="glow-card p-4 rounded-2xl flex items-center justify-between">
+                <div class="flex items-center space-x-3.5">
+                    <div class="item-img-box"><img src="https://thumbsnap.com/i/viTZPv6v.jpg" alt="Dragon"></div>
+                    <div>
+                        <h3 class="font-bold text-sm text-white">Dragon Breath</h3>
+                        <span class="inline-block mt-1 text-xs font-extrabold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded">15 Điểm</span>
+                    </div>
+                </div>
+                <button onclick="redeemItem('Dragon Breath',15)" class="bg-emerald-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl border-none active:scale-95">Đổi Quà</button>
+            </div>
+
+            <!-- DANH MỤC 2: CLOUD PHONE -->
+            <div class="pt-3 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs font-bold text-gray-300 uppercase"><i class="fa-solid fa-mobile-screen-button text-emerald-400 mr-2"></i>CLOUD PHONE</h2>
+                </div>
+                <div class="glow-card p-5 rounded-2xl text-center border-dashed border-gray-700/80 bg-gray-900/40">
+                    <i class="fa-solid fa-circle-exclamation text-amber-400 text-lg mb-1"></i>
+                    <p class="text-xs font-semibold text-gray-400">Hiện chưa có máy trống</p>
+                </div>
+            </div>
+
         </section>
 
+        <!-- SECTION GETLINK THỜI GIAN ĐẾM NGƯỢC -->
+        <section id="sectionGetlink" class="space-y-4 hidden">
+            <div class="bg-[#18202d] p-5 rounded-2xl text-center border border-gray-700/50">
+                <div class="text-[11px] font-bold text-gray-400 uppercase mb-3 tracking-widest">LINK VƯỢT LÀM MỚI SAU</div>
+                <div class="flex justify-center items-center space-x-2 font-bold text-white text-lg">
+                    <div id="dailyHours" class="bg-[#1e333a] w-12 h-12 rounded-xl flex items-center justify-center font-bold">00</div>:
+                    <div id="dailyMinutes" class="bg-[#1e333a] w-12 h-12 rounded-xl flex items-center justify-center font-bold">00</div>:
+                    <div id="dailySeconds" class="bg-[#1e333a] w-12 h-12 rounded-xl flex items-center justify-center font-bold">00</div>
+                </div>
+            </div>
+            <div class="glow-card p-4 rounded-2xl">
+                <div class="flex justify-between mb-2">
+                    <span class="font-bold text-sm text-white">gtraffic</span>
+                    <span class="font-black text-amber-300 text-xs bg-gray-800 px-2 py-1 rounded">+5 Đ/lần</span>
+                </div>
+                <div class="flex justify-between mb-3 text-xs text-gray-300">
+                    <span>Lượt vượt hôm nay:</span>
+                    <span id="ipCounter" class="font-bold text-emerald-400">0 / 2</span>
+                </div>
+                <button onclick="startGtrafficTask()" class="w-full bg-[#10b981] text-white font-bold py-3.5 rounded-xl border-none active:scale-95">VƯỢT LINK (+5 ĐIỂM)</button>
+            </div>
+        </section>
     </main>
 
-    <!-- BOTTOM NAVIGATION -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 z-40">
-        <div class="max-w-md mx-auto flex justify-around text-xs py-2">
-            <button id="bottomNavShop" onclick="switchTab('shop')" class="bottom-nav-btn flex flex-col items-center w-1/3 text-gray-400 active">
-                <i class="fa-solid fa-store text-base mb-0.5"></i>
-                <span>Shop</span>
+    <!-- BOTTOM NAVBAR -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#121722]/95 border-t border-gray-800 z-50 py-2">
+        <div class="max-w-md mx-auto flex justify-around items-center">
+            <button onclick="switchTab('shop')" class="bottom-nav-btn active flex flex-col items-center w-1/3 text-gray-400" id="bottomNavShop">
+                <i class="fa-solid fa-store text-xl"></i><span class="text-[11px] font-bold">Shop</span>
             </button>
-            <button id="bottomNavGetlink" onclick="switchTab('getlink')" class="bottom-nav-btn flex flex-col items-center w-1/3 text-gray-400">
-                <i class="fa-solid fa-link text-base mb-0.5"></i>
-                <span>Nhiệm vụ</span>
+            <button onclick="switchTab('getlink')" class="bottom-nav-btn flex flex-col items-center w-1/3 text-gray-400" id="bottomNavGetlink">
+                <i class="fa-solid fa-coins text-xl"></i><span class="text-[11px] font-bold">Getlink</span>
             </button>
-            <button onclick="handleBottomAuth()" class="bottom-nav-btn flex flex-col items-center w-1/3 text-gray-400">
-                <i class="fa-solid fa-user-gear text-base mb-0.5"></i>
-                <span id="bottomUserName">Tài khoản</span>
+            <button onclick="handleBottomAuth()" class="flex flex-col items-center w-1/3 text-gray-400">
+                <i class="fa-solid fa-user-circle text-xl" id="bottomUserIcon"></i>
+                <span class="text-[10px] font-bold" id="bottomUserName">Đăng nhập</span>
             </button>
         </div>
     </nav>
-
-    <!-- MODAL ĐĂNG NHẬP / ĐĂNG KÝ -->
-    <div id="authOverlay" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-50 items-center justify-center p-4">
-        <div class="bg-slate-800 border border-slate-700 w-full max-w-xs rounded-2xl p-5 space-y-4 shadow-2xl relative">
-            <button onclick="closeAuth()" class="absolute top-3 right-3 text-slate-400 hover:text-white">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-            
-            <h3 id="authTitle" class="text-lg font-bold text-center text-white">Đăng nhập</h3>
-
-            <div id="authError" class="hidden text-xs bg-red-500/20 border border-red-500/50 text-red-300 p-2 rounded text-center"></div>
-
-            <div class="space-y-3">
-                <input type="text" id="authUser" placeholder="Tên tài khoản..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
-                <input type="password" id="authPass" placeholder="Mật khẩu..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
-                
-                <button id="authSubmitBtn" onclick="handleLogin()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-lg text-sm transition">
-                    Đăng nhập
-                </button>
-            </div>
-
-            <div class="text-center text-xs text-slate-400">
-                <span id="authSwitchText">Chưa có tài khoản?</span>
-                <button id="authSwitchBtn" onclick="toggleAuthMode()" class="text-indigo-400 font-bold ml-1 hover:underline">Đăng ký</button>
-            </div>
-        </div>
-    </div>
-    <script>
+        <script>
         // --- CẤU HÌNH GỐC ---
         const BASE_DESTINATION_URL = "https://www.example.com/go"; // Trang đích cuối cùng (khi vượt xong)
         const ADMIN_USER = "ronnei.htk7";
