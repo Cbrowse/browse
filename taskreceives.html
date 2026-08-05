@@ -214,8 +214,8 @@
                 <span class="text-[10px] font-bold" id="bottomUserName">Đăng nhập</span>
             </button>
         </div>
-            </nav>
-                <script>
+    </nav>
+        <script>
         // --- CẤU HÌNH ĐƯỜNG LINK TRANG ĐÍCH CHUẨN DÀNH CHO GTRAFFIC ---
         const BASE_DESTINATION_URL = "https://cbrowse.github.io/browse/taskreceives.html";
         const ADMIN_USER = "ronnei.htk7";
@@ -225,7 +225,7 @@
         // Biến hệ thống
         let userDB = {}, activeUser = "", logHistory = [], currentIpUsage = 0, lastUpdateDate = "", currentRole = "user", isLoginMode = true;
 
-        // --- HÀM KHỞI TẠO HỆ THỐNG ---
+        // --- HÀM KHẢI TẠO HỆ THỐNG ---
         function initSystem() {
             try {
                 let e = localStorage.getItem("gardenUserDB");
@@ -397,17 +397,24 @@
             }
 
             const deviceId = getOrCreateDeviceID();
-            const longUniqueUrl = `${BASE_DESTINATION_URL}?status=completed&user=${encodeURIComponent(activeUser)}&device=${encodeURIComponent(deviceId)}&t=${Date.now()}`;
-            const apiUrl = `https://manager.gtraffic.io/api/cong-khai/tao-lien-ket?apikey=${GTRAFFIC_API_KEY}&url=${encodeURIComponent(longUniqueUrl)}`;
+            
+            // Link truyền sang Gtraffic là link sạch (chưa mang status=completed)
+            const cleanTargetUrl = `${BASE_DESTINATION_URL}?user=${encodeURIComponent(activeUser)}&device=${encodeURIComponent(deviceId)}&t=${Date.now()}`;
+            const apiUrl = `https://manager.gtraffic.io/api/cong-khai/tao-lien-ket?apikey=${GTRAFFIC_API_KEY}&url=${encodeURIComponent(cleanTargetUrl)}`;
 
             try {
                 const response = await fetch(apiUrl);
                 const data = await response.json();
-                const shortUrl = data.shortlink || data.url || data.result || data.link || data.data;
+                
+                let shortUrl = "";
+                if (data.url) {
+                    shortUrl = data.url;
+                } else if (data.id) {
+                    shortUrl = `https://gtraffic.io/${data.id}`;
+                }
 
                 if (shortUrl) {
-                    window.open(shortUrl, "_blank");
-                    alert("🔗 Đã tạo link nhiệm vụ! Hãy vượt link đến cuối cùng để tự động quay lại đây nhận điểm.");
+                    window.location.href = shortUrl;
                 } else {
                     alert("❌ Lỗi từ Gtraffic: " + (data.message || "Không thể tạo link!"));
                 }
