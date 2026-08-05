@@ -214,10 +214,10 @@
                 <span class="text-[10px] font-bold" id="bottomUserName">Đăng nhập</span>
             </button>
         </div>
-    </nav>
-        <script>
-        // --- CẤU HÌNH GỐC & TÍCH HỢP LINK TRANG ĐÍCH XÁC THỰC ---
-        const BASE_DESTINATION_URL = "https://cbrowse.github.io/browse/taskreceivesgrowagarden2.html";
+            </nav>
+                <script>
+        // --- CẤU HÌNH ĐƯỜNG LINK TRANG ĐÍCH CHUẨN DÀNH CHO GTRAFFIC ---
+        const BASE_DESTINATION_URL = "https://cbrowse.github.io/browse/taskreceives.html";
         const ADMIN_USER = "ronnei.htk7";
         const ADMIN_PASS = "icloucom12";
         const GTRAFFIC_API_KEY = "54ed5096b0af4edc8c5dd31dfb5b2502";
@@ -269,7 +269,6 @@
             }
         }
 
-        // --- ĐỊNH DANH THIẾT BỊ (DEVICE ID) ---
         function getOrCreateDeviceID() {
             let deviceId = localStorage.getItem("gardenDeviceID");
             if (!deviceId) {
@@ -279,7 +278,6 @@
             return deviceId;
         }
 
-        // --- QUẢN LÝ TÊN NHẬN QUÀ ROBLOX ---
         function confirmRecipientName() {
             if (!activeUser) { alert("⚠️ Bạn cần đăng nhập tài khoản trước!"); openAuth(); return; }
             const val = document.getElementById("robloxRecipientInput").value.trim();
@@ -289,7 +287,6 @@
             alert(`✅ Đã lưu tên nhận quà Roblox: "${val}"`);
         }
 
-        // --- LOG HOẠT ĐỘNG (DÀNH CHO ADMIN) ---
         function addLog(username, action, recipient = "-", points = 0) {
             let timeStr = new Date().toLocaleTimeString("vi-VN", { hour12: false });
             logHistory.unshift({ time: timeStr, username: username, recipient: recipient, action: action, points: points });
@@ -318,7 +315,6 @@
             if (confirm("Xóa toàn bộ log?")) { logHistory = []; saveData(); renderLogs(); }
         }
 
-        // --- ĐĂNG NHẬP / ĐĂNG KÝ (AUTH) ---
         function openAuth() { document.getElementById("authOverlay").classList.add("active"); }
         function closeAuth() { document.getElementById("authOverlay").classList.remove("active"); }
 
@@ -356,7 +352,6 @@
         function handleBottomAuth() { activeUser ? logout() : openAuth(); }
         function logout() { if (confirm("Đăng xuất?")) { activeUser = ""; currentRole = "user"; saveData(); updateUI(); } }
 
-        // --- GIAO DIỆN & TABS ---
         function switchTab(tab) {
             document.getElementById("sectionShop").classList.toggle("hidden", tab !== "shop");
             document.getElementById("sectionGetlink").classList.toggle("hidden", tab !== "getlink");
@@ -386,7 +381,6 @@
                 recipientInput.value = "";
             }
 
-            // ADMIN SẼ HIỂN THỊ VÔ HẠN LƯỢT TEST
             if (currentRole === "admin") {
                 document.getElementById("ipCounter").innerText = `${currentIpUsage} / ∞ (Admin Test)`;
             } else {
@@ -394,11 +388,9 @@
             }
         }
 
-        // --- XỬ LÝ NHIỆM VỤ VƯỢT LINK ---
         async function startGtrafficTask() {
             if (!activeUser) { openAuth(); return; }
 
-            // NẾU KHÔNG PHẢI ADMIN THÌ MỚI ĐÁNH GIÁ GIỚI HẠN 2 LƯỢT
             if (currentRole !== "admin" && currentIpUsage >= 2) { 
                 alert("⚠️ IP mạng của bạn đã hết 2 lượt hôm nay!"); 
                 return; 
@@ -415,7 +407,7 @@
 
                 if (shortUrl) {
                     window.open(shortUrl, "_blank");
-                    alert("🔗 Đã tạo link nhiệm vụ! Hãy vượt link đến cuối cùng để tự động quay lại web nhận điểm.");
+                    alert("🔗 Đã tạo link nhiệm vụ! Hãy vượt link đến cuối cùng để tự động quay lại đây nhận điểm.");
                 } else {
                     alert("❌ Lỗi từ Gtraffic: " + (data.message || "Không thể tạo link!"));
                 }
@@ -425,14 +417,12 @@
             }
         }
 
-        // --- HÀM KIỂM TRA & CỘNG ĐIỂM KHI NGƯỜI DÙNG QUAY LẠI TỪ GTRAFFIC ---
         function checkRewardOnReturn() {
             const urlParams = new URLSearchParams(window.location.search);
             const status = urlParams.get('status');
             const user = urlParams.get('user');
 
             if (status === 'completed' && user && userDB[user]) {
-                // NẾU KHÔNG PHẢI ADMIN THÌ MỚI CHẶN KHI HẾT LƯỢT
                 if (currentRole !== "admin" && currentIpUsage >= 2) {
                     alert("⚠️ IP của bạn đã dùng hết 2 lượt hôm nay!");
                     window.history.replaceState({}, document.title, window.location.pathname);
@@ -441,7 +431,6 @@
 
                 userDB[user].points = (userDB[user].points || 0) + 5;
                 
-                // Chỉ tăng biến đếm đếm lượt với tài khoản thường
                 if (currentRole !== "admin") {
                     currentIpUsage++;
                 }
@@ -451,13 +440,10 @@
                 addLog(user, "Vượt Link thành công (Đã xác thực)", "-", 5);
                 
                 alert(`🎉 Chúc mừng ${user}! Bạn đã vượt link thành công và nhận được +5 điểm!`);
-
-                // Xóa tham số xác thực trên URL sau khi hoàn tất
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         }
 
-        // --- XỬ LÝ ĐỔI QUÀ ---
         function redeemItem(name, cost) {
             if (!activeUser) { openAuth(); return; }
             const recipient = userDB[activeUser]?.recipient?.trim();
@@ -476,7 +462,6 @@
             alert(`🎉 Đã tạo đơn nhận '${name}' thành công cho Roblox ID: '${recipient}'!`);
         }
 
-        // --- BỘ ĐẾM NGƯỢC GIỜ VIỆT NAM ---
         function updateVNCountdown() {
             const now = new Date();
             const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
@@ -497,7 +482,6 @@
             document.getElementById("dailySeconds").innerText = String(s).padStart(2, "0");
         }
 
-        // KHỞI CHẠY HỆ THỐNG
         initSystem(); checkDailyReset(); updateUI(); checkRewardOnReturn();
         setInterval(updateVNCountdown, 1000);
         updateVNCountdown();
