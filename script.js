@@ -1,4 +1,4 @@
-const BASE_DEST = "https://cbrowse.github.io/browse/taskreceives.html";
+Const BASE_DEST = "https://cbrowse.github.io/browse/taskreceives.html";
 const GTRAFFIC_KEY = "54ed5096b0af4edc8c5dd31dfb5b2502";
 
 const defaultProds = [
@@ -116,6 +116,7 @@ function updateUI() {
   renderUserHistory(); renderLogs(); renderProducts(); updateAccProductDropdown(); updateAdminUserDropdown();
 }
 
+// KIỂM TRA VÀ HIỂN THỊ NOTE BỔ SUNG TỪ ADMIN CHO TV TRONG 10 GIÂY
 function checkAndShowAdminNote() {
   const note = userDB[activeUser]?.adminNote;
   if (note) {
@@ -129,6 +130,7 @@ function checkAndShowAdminNote() {
     let count = 10;
     timerEl.innerText = `${count}s`;
     
+    // Xóa note khỏi DB để không hiện lại lần sau
     delete userDB[activeUser].adminNote;
     saveData();
 
@@ -260,7 +262,7 @@ function handleLogin() {
   saveData(); updateUI(); closeAuth();
 }
 function handleBottomAuth() { openAuth(); }
-      // NẠP DANH SÁCH THÀNH VIÊN VÀO ADMIN QUẢN LÝ
+// NẠP DANH SÁCH THÀNH VIÊN VÀO ADMIN QUẢN LÝ
 function updateAdminUserDropdown() {
   const selUser = document.getElementById("admSelectUser");
   if (!selUser) return;
@@ -290,6 +292,7 @@ function onAdminSelectUserChange() {
   document.getElementById("admUserRoblox").innerText = uObj.recipient || "Chưa lưu";
   document.getElementById("admEditPointsInput").value = uObj.points || 0;
 
+  // Render nhật ký của thành viên được chọn
   const historyBox = document.getElementById("admSelectedUserHistory");
   if (historyBox) {
     historyBox.innerHTML = "";
@@ -323,25 +326,6 @@ function adminSetUserPoints() {
   addLog(activeUser, `Sửa điểm ${targetUser}: ${oldPts} -> ${newPts}`, "-", 0);
   saveData(); updateUI();
   alert(`✅ Đã cập nhật điểm cho "${targetUser}" thành ${newPts} ĐC!`);
-}
-
-// TÍNH NĂNG MỚI: XÓA TÀI KHOẢN THÀNH VIÊN
-function adminDeleteUser() {
-  if (userDB[activeUser]?.role !== "admin") return;
-  const targetUser = document.getElementById("admSelectUser")?.value;
-
-  if (!targetUser || !userDB[targetUser]) { alert("⚠️ Chưa chọn thành viên!"); return; }
-  if (targetUser === activeUser) { alert("⚠️ Không thể tự xóa tài khoản của chính mình!"); return; }
-  if (userDB[targetUser].role === "admin") { alert("⚠️ Không thể xóa tài khoản Admin!"); return; }
-
-  if (confirm(`⚠️ Bạn có chắc chắn muốn XÓA VĨNH VIỄN tài khoản "${targetUser}"?`)) {
-    delete userDB[targetUser];
-    addLog(activeUser, `Xóa tài khoản ${targetUser}`, "-", 0);
-    saveData();
-    updateAdminUserDropdown();
-    updateUI();
-    alert(`✅ Đã xóa thành công tài khoản "${targetUser}"!`);
-  }
 }
 
 // GỬI NOTE NỔI 10 GIÂY CHO THÀNH VIÊN
@@ -419,90 +403,4 @@ function adminSaveProduct() {
   if (idx >= 0) { 
     products[idx].points = pts; 
     products[idx].img = img; 
-    products[idx].category = cat; 
-    products[idx].type = type;
-    products[idx].status = status;
-  } else { 
-    products.push({ id: Date.now(), name: n, points: pts, img, category: cat, type, status }); 
-  }
-  
-  saveData(); renderProducts(); updateAccProductDropdown();
-  document.getElementById("admProdName").value = ""; 
-  document.getElementById("admProdPoints").value = ""; 
-  document.getElementById("admProdImg").value = "";
-  alert("✅ Đã cập nhật sản phẩm và trạng thái!");
-}
-
-function adminDeleteProduct(id) {
-  if (userDB[activeUser]?.role !== "admin") return;
-  if (confirm("Xóa sản phẩm này?")) { 
-    products = products.filter(p => p.id !== id); 
-    saveData(); renderProducts(); updateAccProductDropdown(); 
-  }
-}
-
-function adminAddCloudAcc() {
-  if (userDB[activeUser]?.role !== "admin") return;
-  const prodName = document.getElementById("admAccTargetProd")?.value;
-  const u = document.getElementById("admAccUser").value.trim();
-  const p = document.getElementById("admAccPass").value.trim();
-  const note = document.getElementById("admAccNote")?.value.trim();
-  
-  if (!prodName) { alert("⚠️ Vui lòng tạo sản phẩm loại Tài Khoản trước!"); return; }
-  if (!u || !p) { alert("⚠️ Nhập đủ Tk và Mk!"); return; }
-  
-  cloudStock.push({ id: Date.now(), prodName, user: u, pass: p, note: note || "Không có ghi chú" }); 
-  saveData(); renderCloudStock();
-  
-  document.getElementById("admAccUser").value = ""; 
-  document.getElementById("admAccPass").value = ""; 
-  if (document.getElementById("admAccNote")) document.getElementById("admAccNote").value = "";
-  alert(`✅ Đã thêm nick vào sản phẩm: "${prodName}"`);
-}
-
-function renderCloudStock() {
-  const b = document.getElementById("cloudAccList"); if (!b) return; b.innerHTML = "";
-  if (!cloudStock.length) { b.innerHTML = `<div class="text-xs text-gray-500 italic">Kho trống</div>`; return; }
-  cloudStock.forEach(a => {
-    b.innerHTML += `<div class="flex items-center justify-between bg-gray-900 p-2 rounded-lg text-xs mb-1 border border-gray-800">
-      <div>
-        <div class="text-[10px] text-amber-400 font-bold uppercase">📦 ${a.prodName || 'Gói Chung'}</div>
-        <div><span class="text-emerald-400 font-mono font-bold">${a.user}</span> | <span class="text-amber-300 font-mono">${a.pass}</span></div>
-        <div class="text-[10px] text-gray-400 italic mt-0.5">📌 Note: ${a.note || 'Không có'}</div>
-      </div>
-      <button onclick="adminDeleteCloudAcc(${a.id})" class="text-red-400 border-none bg-transparent ml-2"><i class="fa-solid fa-trash"></i></button>
-    </div>`;
-  });
-}
-
-function adminDeleteCloudAcc(id) {
-  if (userDB[activeUser]?.role !== "admin") return;
-  cloudStock = cloudStock.filter(a => a.id !== id); saveData(); renderCloudStock();
-}
-
-function addLog(username, action, recipient = "-", points = 0) {
-  let t = new Date().toLocaleTimeString("vi-VN", { hour12: false });
-  logHistory.unshift({ time: t, username, recipient, action, points });
-  if (logHistory.length > 100) logHistory.pop();
-  saveData(); renderLogs();
-}
-
-function renderLogs() {
-  const e = document.getElementById("logBody"); if (!e) return; e.innerHTML = "";
-  logHistory.forEach(t => {
-    e.innerHTML += `<tr><td class="text-gray-500">${t.time}</td><td class="font-semibold text-white">${t.username}</td><td class="text-amber-300 font-bold">${t.recipient || '-'}</td><td class="text-amber-400 font-bold">${t.action} (${t.points}Đ)</td></tr>`;
-  });
-}
-
-function clearLogs() {
-  if (userDB[activeUser]?.role !== "admin") return;
-  if (confirm("Xóa log?")) { logHistory = []; saveData(); renderLogs(); }
-}
-
-function startGtrafficTask() {
-  const dest = `${BASE_DEST}?status=completed&user=${encodeURIComponent(activeUser)}&t=${Date.now()}`;
-  window.location.href = `https://gtraffic.io/st?apikey=${GTRAFFIC_KEY}&url=${encodeURIComponent(dest)}`;
-}
-
-document.addEventListener("DOMContentLoaded", () => { initSystem(); updateUI(); });
-  
+    products[idx].category = 
