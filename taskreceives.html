@@ -388,7 +388,8 @@
             }
         }
 
-        async function startGtrafficTask() {
+        // --- HÀM TẠO VƯỢT LINK DÙNG QUICK LINK GTRAFFIC ---
+        function startGtrafficTask() {
             if (!activeUser) { openAuth(); return; }
 
             if (currentRole !== "admin" && currentIpUsage >= 2) { 
@@ -398,30 +399,14 @@
 
             const deviceId = getOrCreateDeviceID();
             
-            // Link truyền sang Gtraffic là link sạch (chưa mang status=completed)
-            const cleanTargetUrl = `${BASE_DESTINATION_URL}?user=${encodeURIComponent(activeUser)}&device=${encodeURIComponent(deviceId)}&t=${Date.now()}`;
-            const apiUrl = `https://manager.gtraffic.io/api/cong-khai/tao-lien-ket?apikey=${GTRAFFIC_API_KEY}&url=${encodeURIComponent(cleanTargetUrl)}`;
+            // 1. URL Đích mang theo tham số cộng điểm khi vượt xong thành công
+            const destinationUrl = `${BASE_DESTINATION_URL}?status=completed&user=${encodeURIComponent(activeUser)}&device=${encodeURIComponent(deviceId)}&t=${Date.now()}`;
+            
+            // 2. Đường dẫn Quick Link trực tiếp của Gtraffic
+            const quickLinkUrl = `https://gtraffic.io/st?apikey=${GTRAFFIC_API_KEY}&url=${encodeURIComponent(destinationUrl)}`;
 
-            try {
-                const response = await fetch(apiUrl);
-                const data = await response.json();
-                
-                let shortUrl = "";
-                if (data.url) {
-                    shortUrl = data.url;
-                } else if (data.id) {
-                    shortUrl = `https://gtraffic.io/${data.id}`;
-                }
-
-                if (shortUrl) {
-                    window.location.href = shortUrl;
-                } else {
-                    alert("❌ Lỗi từ Gtraffic: " + (data.message || "Không thể tạo link!"));
-                }
-            } catch (error) {
-                console.error("Lỗi kết nối Gtraffic API:", error);
-                alert("❌ Lỗi kết nối máy chủ Gtraffic, vui lòng thử lại!");
-            }
+            // 3. Chuyển hướng người dùng trực tiếp sang Gtraffic
+            window.location.href = quickLinkUrl;
         }
 
         function checkRewardOnReturn() {
