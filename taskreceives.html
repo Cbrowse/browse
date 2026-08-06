@@ -1,275 +1,690 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-    <title>Shop Tích Điểm Đổi Quà VIP</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Receives & Shop</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background: #0b0f19; color: #f3f4f6; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+    .glow-card { background: rgba(17,24,39,.85); border: 1px solid rgba(16, 185, 129, 0.2); }
+    .admin-card { background: rgba(30,41,59,.9); border: 1px solid rgba(239, 68, 68, 0.2); }
+    .tab-btn.active { color: #10b981 !important; border-bottom: 2px solid #10b981; }
+    .bottom-nav-btn.active { color: #10b981 !important; }
+    .item-img-box { width: 56px; height: 56px; border-radius: 12px; overflow: hidden; background: #1f2937; flex-shrink: 0; }
+    .item-img-box img { width: 100%; height: 100%; object-fit: cover; }
+    .modal-overlay, #resultOverlay, #authOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; z-index: 50; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-overlay.active, #resultOverlay.active, #authOverlay.active { display: flex; }
+    .modal-box { background: #1f2937; padding: 20px; border-radius: 16px; width: 100%; max-width: 400px; border: 1px solid rgba(16,185,129,0.3); }
+    .admin-input { width: 100%; background: #111827; border: 1px solid #374151; padding: 10px; border-radius: 8px; color: white; font-size: 14px; outline: none; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    table th { text-align: left; padding: 6px; background: #111827; color: #10b981; }
+    table td { padding: 6px; border-bottom: 1px solid #374151; color: #d1d5db; }
+    .history-wrap { max-height: 180px; overflow-y: auto; }
+    button { cursor: pointer; touch-action: manipulation; }
+  </style>
 </head>
-<body>
+<body class="pb-20">
 
-    <!-- POPUP NOTE TỪ ADMIN (TỰ ẨN SAU 10 GIÂY) -->
-    <div id="adminNoteToast" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 w-11/12 max-w-md bg-amber-400 text-gray-950 font-bold p-3.5 rounded-2xl shadow-2xl border-2 border-amber-300 hidden transition-all duration-300 animate-bounce">
-        <div class="flex items-center justify-between mb-1.5 text-xs uppercase tracking-wider text-gray-900 border-b border-amber-600/30 pb-1">
-            <span><i class="fa-solid fa-bullhorn mr-1 text-red-600"></i> THÔNG BÁO TỪ ADMIN</span>
-            <span id="noteTimer" class="text-[10px] bg-gray-950 text-amber-400 px-2 py-0.5 rounded-full font-black">10s</span>
-        </div>
-        <div id="adminNoteText" class="text-xs font-bold leading-relaxed text-gray-950"></div>
+  <!-- Toast Note từ Admin -->
+  <div id="adminNoteToast" class="hidden fixed top-4 left-4 right-4 z-50 bg-amber-500/90 text-gray-900 p-3 rounded-xl shadow-lg border border-amber-300 flex justify-between items-center">
+    <div>
+      <div class="font-bold text-xs"><i class="fa-solid fa-bell mr-1"></i> Thông báo từ Admin (<span id="noteTimer">10s</span>)</div>
+      <div id="adminNoteText" class="text-sm mt-0.5 font-medium"></div>
     </div>
+    <button onclick="document.getElementById('adminNoteToast').classList.add('hidden')" class="text-gray-900 font-bold px-2 py-1 bg-white/20 rounded-lg text-xs">Đóng</button>
+  </div>
 
-    <!-- MODAL HIỂN THỊ KẾT QUẢ VÀ NÚT SAO CHÉP TẤT CẢ -->
-    <div id="resultOverlay">
-        <div class="auth-box text-center border-emerald-500/50 space-y-3">
-            <div class="text-3xl">🎁</div>
-            <h3 id="resTitle" class="text-emerald-400 font-bold text-base uppercase">THÔNG BÁO</h3>
-            <div id="resBody" class="bg-gray-950 p-3 rounded-xl border border-gray-800 text-xs text-left text-gray-300"></div>
-            <div class="flex space-x-2 pt-2">
-                <button onclick="copyResultText()" class="flex-1 bg-amber-500 hover:bg-amber-400 text-gray-950 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1 border-none">
-                    <i class="fa-solid fa-copy"></i>
-                    <span>Sao Chép Tất Cả</span>
-                </button>
-                <button onclick="closeResultModal()" class="bg-gray-800 text-gray-300 font-bold px-4 py-2.5 rounded-xl text-xs border-none">Đóng</button>
-            </div>
-        </div>
+  <!-- Header -->
+  <header class="bg-gray-900/80 backdrop-blur border-b border-gray-800 sticky top-0 z-40 px-4 py-3 flex justify-between items-center">
+    <div class="flex items-center space-x-2">
+      <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold">
+        <i class="fa-solid fa-store"></i>
+      </div>
+      <div>
+        <div class="text-xs text-gray-400">Xin chào, <span id="activeUsername" class="text-white font-bold">ronnei.htk7</span></div>
+        <div id="roleBadge" class="text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 px-1.5 py-0.2 rounded font-bold">ADMIN TOÀN QUYỀN</div>
+      </div>
     </div>
-
-    <!-- OVERLAY ĐĂNG NHẬP / ĐĂNG KÝ -->
-    <div id="authOverlay">
-        <div class="auth-box">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-white font-bold text-base" id="authTitle">Đăng Nhập / Đăng Ký</h3>
-                <button onclick="closeAuth()" class="text-gray-400 hover:text-white text-lg bg-transparent border-none"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <input type="text" id="authUser" class="auth-input" placeholder="Tên đăng nhập">
-            <input type="password" id="authPass" class="auth-input" placeholder="Mật khẩu">
-            <button onclick="handleLogin()" id="authSubmitBtn" class="auth-btn bg-emerald-600 text-white mt-2 w-full py-2 rounded-xl font-bold border-none">Đăng Nhập</button>
-            <div class="text-center mt-3 text-xs text-gray-400">
-                <span id="authSwitchText">Chưa có tài khoản?</span>
-                <button onclick="toggleAuthMode()" id="authSwitchBtn" class="text-emerald-400 font-semibold ml-1 bg-transparent border-none">Đăng ký</button>
-            </div>
-        </div>
+    <div class="flex items-center space-x-2">
+      <div class="bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-xl flex items-center space-x-1.5">
+        <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
+        <span id="headerPoints" class="text-xs font-extrabold text-amber-300">0 ĐC</span>
+      </div>
+      <button onclick="openAuth()" class="bg-gray-800 text-gray-300 border border-gray-700 px-3 py-1.5 rounded-xl text-xs font-bold">Đổi TK</button>
     </div>
+  </header>
 
-    <!-- HEADER -->
-    <header class="w-full border-b border-gray-800 bg-gray-900/90 sticky top-0 z-40 backdrop-blur-md px-4 py-3">
-        <div class="max-w-md mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <span class="text-2xl">👑</span>
-                <div>
-                    <h1 class="font-black text-xs text-emerald-400 leading-none uppercase">SHOP TÍCH ĐIỂM ĐỔI QUÀ</h1>
-                    <span class="text-[10px] text-gray-400">Nhiệm vụ vượt link nhận điểm</span>
-                </div>
-            </div>
-            <div class="bg-gray-800/90 border border-gray-700 px-3 py-1.5 rounded-full flex items-center space-x-1.5">
-                <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
-                <span id="headerPoints" class="text-xs font-bold text-amber-400">0 ĐC</span>
-            </div>
+  <!-- Top Tabs -->
+  <nav class="max-w-md mx-auto px-4 mt-3">
+    <div class="flex border-b border-gray-800 text-xs font-bold text-gray-400">
+      <button onclick="switchTab('shop')" id="topTabShop" class="flex-1 py-2.5 text-center tab-btn active border-none bg-transparent">Cửa Hàng</button>
+      <button onclick="switchTab('getlink')" id="topTabGetlink" class="flex-1 py-2.5 text-center tab-btn border-none bg-transparent">Vượt Link (+5Đ)</button>
+      <button onclick="switchTab('admin')" id="topTabAdmin" class="flex-1 py-2.5 text-center tab-btn border-none bg-transparent text-red-400">Quản Trị</button>
+    </div>
+  </nav>
+
+  <!-- Main Content Container -->
+  <main class="max-w-md mx-auto p-4 space-y-4">
+
+    <!-- SECTION SHOP -->
+    <section id="sectionShop" class="space-y-4">
+      <div class="glow-card p-4 rounded-2xl">
+        <h2 class="text-xs font-bold text-gray-300 uppercase mb-2"><i class="fa-solid fa-gamepad text-emerald-400 mr-1.5"></i>Tên Roblox Nhận Quà</h2>
+        <div class="flex space-x-2">
+          <input type="text" id="robloxRecipientInput" placeholder="Nhập chính xác tên Roblox của bạn..." class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-emerald-500">
+          <button onclick="confirmRecipientName()" class="bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl text-xs border-none">Lưu</button>
         </div>
-        <div class="max-w-md mx-auto flex border-t border-gray-800/60 mt-3 pt-1 text-center font-bold text-xs">
-            <button onclick="switchTab('shop')" class="nav-tab-btn active flex-1 py-2 text-gray-400 bg-transparent border-none" id="topTabShop"><i class="fa-solid fa-store mr-1"></i>Cửa Hàng</button>
-            <button onclick="switchTab('getlink')" class="nav-tab-btn flex-1 py-2 text-gray-400 bg-transparent border-none" id="topTabGetlink"><i class="fa-solid fa-coins mr-1"></i>Nhiệm Vụ</button>
-            <button onclick="switchTab('admin')" class="nav-tab-btn flex-1 py-2 text-red-400 hidden bg-transparent border-none" id="topTabAdmin"><i class="fa-solid fa-user-shield mr-1"></i>Admin</button>
-        </div>
-    </header>
+      </div>
 
-    <!-- MAIN CONTENT -->
-    <main class="max-w-md w-full mx-auto px-4 mt-4 space-y-4">
-        
-        <!-- USER CARD -->
-        <div class="glow-card p-3.5 rounded-2xl border-emerald-500/30 bg-emerald-950/20 space-y-3">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold">
-                        <i class="fa-solid fa-user"></i>
-                    </div>
-                    <div>
-                        <div class="flex items-center space-x-1.5">
-                            <span class="text-[10px] text-gray-400 uppercase font-semibold">TÀI KHOẢN:</span>
-                            <span id="roleBadge" class="text-[9px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.2 rounded font-bold">THÀNH VIÊN</span>
-                        </div>
-                        <span id="activeUsername" class="text-xs font-bold text-white">Khách</span>
-                    </div>
-                </div>
-                <button onclick="handleBottomAuth()" class="text-[11px] bg-emerald-600/30 text-emerald-300 font-bold px-3 py-1.5 rounded-lg border border-emerald-500/30">Đăng Nhập / Đổi Nick</button>
-            </div>
+      <div id="productListContainer" class="space-y-3"></div>
 
-            <div class="border-t border-gray-800/80 pt-2.5 flex items-center justify-between">
-                <div class="text-[11px] font-bold text-amber-400 flex items-center"><i class="fa-solid fa-gift mr-1.5"></i>Roblox nhận:</div>
-                <div class="flex items-center space-x-1.5">
-                    <input type="text" id="robloxRecipientInput" placeholder="Tên Game Roblox" class="bg-gray-900/90 border border-amber-500/30 rounded-lg px-2 py-1 text-xs text-white font-semibold outline-none w-32 text-right">
-                    <button onclick="confirmRecipientName()" class="bg-amber-500 text-gray-950 font-bold text-xs px-2.5 py-1 rounded-lg border-none">Lưu</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- LỊCH SỬ NHẬN ĐIỂM VÀ QUÀ -->
-        <div class="glow-card p-3.5 rounded-2xl space-y-2">
-            <div class="text-xs font-bold text-emerald-400 uppercase flex items-center justify-between">
-                <span><i class="fa-solid fa-box-archive mr-1.5"></i>Lịch Sử Điểm & Quà Đã Đổi</span>
-                <span class="text-[10px] text-gray-400 font-normal">(Lưu Nick/Pass & Vượt Link)</span>
-            </div>
-            <div id="userHistoryList" class="max-h-48 overflow-y-auto pt-1 space-y-2"></div>
-        </div>
-
-        <!-- SECTION SHOP -->
-        <section id="sectionShop" class="space-y-4">
-            <div id="productListContainer" class="space-y-4"></div>
-        </section>
-
+      <div class="glow-card p-4 rounded-2xl">
+        <h2 class="text-xs font-bold text-gray-300 uppercase mb-3"><i class="fa-solid fa-clock-rotate-left text-emerald-400 mr-1.5"></i>Lịch Sử Đổi Quà Của Bạn</h2>
+        <div id="userHistoryList" class="history-wrap space-y-2"></div>
+      </div>
+    </section>
         <!-- SECTION GETLINK -->
-        <section id="sectionGetlink" class="space-y-4 hidden">
-            <div class="glow-card p-4 rounded-2xl">
-                <div class="flex justify-between mb-2">
-                    <span class="font-bold text-sm text-white">Gtraffic Task</span>
-                    <span class="font-black text-amber-300 text-xs bg-gray-800 px-2 py-1 rounded">+5 Đ/lần</span>
-                </div>
-                <div class="flex justify-between mb-3 text-xs text-gray-300">
-                    <span>Nhiệm vụ:</span>
-                    <span class="font-bold text-emerald-400">Vượt link nhận điểm tự động</span>
-                </div>
-                <button onclick="startGtrafficTask()" class="w-full bg-[#10b981] text-white font-bold py-3 rounded-xl border-none active:scale-95">VƯỢT LINK (+5 ĐIỂM)</button>
-            </div>
-        </section>
-
-        <!-- SECTION ADMIN -->
-        <section id="sectionAdmin" class="space-y-4 hidden">
-            
-            <!-- QUẢN LÝ THÀNH VIÊN, ĐIỂM, NOTE & XÓA TÀI KHOẢN -->
-            <div class="admin-card p-4 rounded-2xl border-blue-500/40">
-                <h3 class="text-xs font-bold text-blue-400 uppercase mb-3"><i class="fa-solid fa-users-gear mr-1.5"></i>Quản Lý Thành Viên</h3>
-                
-                <label class="text-[11px] text-gray-400 font-bold block mb-1">1. Chọn thành viên để xem/quản lý:</label>
-                <select id="admSelectUser" class="admin-input border-blue-500/50 text-blue-300 font-bold mb-3" onchange="onAdminSelectUserChange()">
-                    <!-- Load danh sách TV -->
-                </select>
-
-                <div id="admUserInfoBox" class="bg-gray-900/90 p-2.5 rounded-xl border border-gray-800 text-xs mb-3 space-y-1.5">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-400">Điểm hiện tại:</span>
-                        <span id="admUserCurrentPts" class="font-bold text-amber-400">0 ĐC</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-400">Nick Roblox:</span>
-                        <span id="admUserRoblox" class="font-bold text-emerald-400">-</span>
-                    </div>
-                </div>
-
-                <label class="text-[11px] text-gray-400 font-bold block mb-1">2. Chỉnh sửa điểm số TV:</label>
-                <div class="flex space-x-2 mb-3">
-                    <input type="number" id="admEditPointsInput" class="admin-input !mb-0 flex-1" placeholder="Nhập số điểm mới">
-                    <button onclick="adminSetUserPoints()" class="bg-blue-600 text-white text-xs font-bold px-3 py-2 rounded-xl border-none active:scale-95">Lưu Điểm</button>
-                </div>
-
-                <label class="text-[11px] text-gray-400 font-bold block mb-1">3. Gửi Note hiện 10s màn hình thành viên:</label>
-                <div class="flex space-x-2 mb-3">
-                    <input type="text" id="admSendNoteInput" class="admin-input !mb-0 flex-1" placeholder="Nhập tin nhắn cho TV...">
-                    <button onclick="adminSendNoteToUser()" class="bg-amber-500 text-gray-950 text-xs font-bold px-3 py-2 rounded-xl border-none active:scale-95">Gửi Note (10s)</button>
-                </div>
-
-                <!-- NÚT XÓA TÀI KHOẢN THÀNH VIÊN -->
-                <button onclick="adminDeleteUser()" class="w-full bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2.5 rounded-xl border-none mb-3 active:scale-95 transition-all flex items-center justify-center space-x-1.5">
-                    <i class="fa-solid fa-user-xmark"></i>
-                    <span>XÓA TÀI KHOẢN THÀNH VIÊN NÀY</span>
-                </button>
-
-                <div class="text-[11px] font-bold text-gray-400 uppercase mb-1">Nhật ký hoạt động của TV này:</div>
-                <div id="admSelectedUserHistory" class="max-h-36 overflow-y-auto space-y-1.5 bg-gray-950 p-2 rounded-xl border border-gray-800 text-[11px]"></div>
-            </div>
-
-            <!-- QUẢN LÝ SẢN PHẨM -->
-            <div class="admin-card p-4 rounded-2xl">
-                <h3 class="text-xs font-bold text-emerald-400 uppercase mb-3"><i class="fa-solid fa-plus-circle mr-1.5"></i>Thêm / Đổi Giá / Trạng Thái</h3>
-                
-                <label class="text-[11px] text-gray-400 font-bold block mb-1">Chọn sản phẩm có sẵn để sửa:</label>
-                <select id="admSelectExistProd" class="admin-input border-emerald-500/50 text-emerald-300 font-bold mb-3" onchange="onAdminSelectProductChange()">
-                    <!-- Load sản phẩm -->
-                </select>
-
-                <input type="text" id="admProdName" class="admin-input" placeholder="Tên sản phẩm">
-                <input type="number" id="admProdPoints" class="admin-input" placeholder="Số điểm cần đổi">
-                <input type="text" id="admProdImg" class="admin-input" placeholder="Link ảnh (https://...)">
-                
-                <select id="admProdCategory" class="admin-input">
-                    <option value="CLOUD PHONE">Danh mục: CLOUD PHONE</option>
-                    <option value="GROW A GARDEN 2">Danh mục: GROW A GARDEN 2</option>
-                </select>
-
-                <select id="admProdType" class="admin-input">
-                    <option value="account">Loại: Nhận Nick / Pass (Tài Khoản)</option>
-                    <option value="roblox">Loại: Nhận qua Tên Roblox (Vật Phẩm)</option>
-                </select>
-
-                <select id="admProdStatus" class="admin-input border-amber-500/50 text-amber-300 font-bold">
-                    <option value="in_stock">🟢 Trạng thái: CÒN HÀNG (Hiển thị màu xanh)</option>
-                    <option value="out_of_stock">🔴 Trạng thái: HẾT HÀNG (Hiển thị màu đỏ)</option>
-                </select>
-
-                <button onclick="adminSaveProduct()" class="w-full bg-emerald-600 text-white font-bold py-2.5 rounded-xl border-none mt-1 active:scale-95">LƯU CẬP NHẬT SẢN PHẨM</button>
-            </div>
-
-            <!-- QUẢN LÝ KHO NICK -->
-            <div class="admin-card p-4 rounded-2xl">
-                <h3 class="text-xs font-bold text-amber-400 uppercase mb-3"><i class="fa-solid fa-key mr-1.5"></i>Kho Nick / Pass Tài Khoản</h3>
-                
-                <label class="text-[11px] text-gray-400 font-bold block mb-1">Chọn sản phẩm cần thêm nick:</label>
-                <select id="admAccTargetProd" class="admin-input border-amber-500/50 text-amber-300 font-bold">
-                    <!-- Load tên sản phẩm loại tài khoản -->
-                </select>
-
-                <input type="text" id="admAccUser" class="admin-input" placeholder="Tài khoản / Username">
-                <input type="text" id="admAccPass" class="admin-input" placeholder="Mật khẩu / Password">
-                <input type="text" id="admAccNote" class="admin-input" placeholder="Ghi chú / Note (Ví dụ: Hạn 7 ngày...)">
-                
-                <button onclick="adminAddCloudAcc()" class="w-full bg-amber-500 text-gray-950 font-bold py-2.5 rounded-xl border-none mb-3 active:scale-95">THÊM TÀI KHOẢN VÀO KHO</button>
-                
-                <div class="text-[11px] font-bold text-gray-400 uppercase mb-1">Danh sách Nick/Pass trong kho:</div>
-                <div id="cloudAccList" class="space-y-2 max-h-48 overflow-y-auto"></div>
-            </div>
-
-            <!-- QUẢN LÝ LOGS -->
-            <div class="admin-card p-4 rounded-2xl">
-                <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-xs font-bold text-gray-300 uppercase"><i class="fa-solid fa-clock-rotate-left mr-1.5"></i>Lịch Sử Hệ Thống</h3>
-                    <button onclick="clearLogs()" class="text-[10px] text-red-400 border-none bg-transparent">Xóa log</button>
-                </div>
-                <div class="log-wrap">
-                    <table class="log-table">
-                        <thead>
-                            <tr>
-                                <th>Giờ</th>
-                                <th>User</th>
-                                <th>Roblox</th>
-                                <th>Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody id="logBody"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- BOTTOM NAVBAR -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-[#121722]/95 border-t border-gray-800 z-50 py-2">
-        <div class="max-w-md mx-auto flex justify-around items-center">
-            <button onclick="switchTab('shop')" class="bottom-nav-btn active flex flex-col items-center text-gray-400 bg-transparent border-none" id="bottomNavShop">
-                <i class="fa-solid fa-store text-lg"></i><span class="text-[10px] font-bold">Shop</span>
-            </button>
-            <button onclick="switchTab('getlink')" class="bottom-nav-btn flex flex-col items-center text-gray-400 bg-transparent border-none" id="bottomNavGetlink">
-                <i class="fa-solid fa-coins text-lg"></i><span class="text-[10px] font-bold">Getlink</span>
-            </button>
-            <button onclick="switchTab('admin')" class="bottom-nav-btn flex flex-col items-center text-red-400 hidden bg-transparent border-none" id="bottomNavAdmin">
-                <i class="fa-solid fa-user-shield text-lg"></i><span class="text-[10px] font-bold">Admin</span>
-            </button>
-            <button onclick="handleBottomAuth()" class="flex flex-col items-center text-gray-400 bg-transparent border-none">
-                <i class="fa-solid fa-user-circle text-lg"></i><span class="text-[10px] font-bold" id="bottomUserName">Khách</span>
-            </button>
+    <section id="sectionGetlink" class="hidden space-y-4">
+      <div class="glow-card p-5 rounded-2xl text-center space-y-3">
+        <div class="w-12 h-12 bg-amber-500/20 border border-amber-500/40 rounded-2xl mx-auto flex items-center justify-center text-amber-400 text-xl font-bold">
+          <i class="fa-solid fa-link"></i>
         </div>
-    </nav>
+        <h2 class="font-bold text-base text-white">Làm Nhiệm Vụ Vượt Link</h2>
+        <p class="text-xs text-gray-400">Hoàn thành vượt link qua hệ thống Gtraffic để nhận ngay <b class="text-amber-400">+5 Điểm Cấu</b> vào tài khoản.</p>
+        <a id="getlinkBtn" href="https://traffic123.net/api/public/v1/redirect?key=54ed5096b0af4edc8c5dd31dfb5b2502&url=https://cbrowse.github.io/browse/taskreceives.html?status=completed" target="_blank" class="block bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-emerald-600/30">
+          <i class="fa-solid fa-arrow-up-right-from-square mr-1.5"></i> BẮT ĐẦU VƯỢT LINK (+5 ĐC)
+        </a>
+      </div>
+    </section>
 
-    <script src="script.js"></script>
+    <!-- SECTION ADMIN -->
+    <section id="sectionAdmin" class="hidden space-y-4">
+      <div class="admin-card p-4 rounded-2xl space-y-3">
+        <h2 class="text-xs font-bold text-red-400 uppercase"><i class="fa-solid fa-shield-halved mr-1.5"></i>Quản Lý Thành Viên & Số Dư</h2>
+        <div class="space-y-2 text-xs">
+          <div>
+            <label class="text-gray-400 mb-1 block">Chọn thành viên:</label>
+            <select id="admSelectUser" onchange="onAdminSelectUserChange()" class="admin-input"></select>
+          </div>
+          <div class="flex justify-between items-center bg-gray-900 p-2.5 rounded-xl border border-gray-800">
+            <div>Điểm hiện tại: <span id="admUserCurrentPts" class="font-bold text-amber-400">0 ĐC</span></div>
+            <div>Roblox: <span id="admUserRoblox" class="font-bold text-emerald-400">--</span></div>
+          </div>
+          <div>
+            <label class="text-gray-400 mb-1 block">Sửa điểm số trực tiếp:</label>
+            <div class="flex space-x-2">
+              <input type="number" id="admEditPointsInput" class="admin-input flex-1" placeholder="Nhập số điểm mới...">
+              <button onclick="adminSetUserPoints()" class="bg-amber-600 font-bold px-4 py-2 rounded-xl text-white border-none">Cập nhật</button>
+            </div>
+          </div>
+          <div>
+            <label class="text-gray-400 mb-1 block">Gửi thông báo nổi (10 giây) cho TV:</label>
+            <div class="flex space-x-2">
+              <input type="text" id="admSendNoteInput" class="admin-input flex-1" placeholder="Nhập nội dung thông báo...">
+              <button onclick="adminSendNoteToUser()" class="bg-blue-600 font-bold px-3 py-2 rounded-xl text-white border-none">Gửi Note</button>
+            </div>
+          </div>
+          <div>
+            <label class="text-gray-400 mb-1.5 block">Nhật ký hoạt động của thành viên này:</label>
+            <div id="admSelectedUserHistory" class="bg-gray-900 p-2 rounded-xl border border-gray-800 history-wrap space-y-1"></div>
+          </div>
+          <button onclick="adminDeleteUser()" class="w-full bg-red-600/20 border border-red-500/40 text-red-400 font-bold py-2 rounded-xl">Xóa tài khoản này</button>
+        </div>
+      </div>
+
+      <div class="admin-card p-4 rounded-2xl space-y-3">
+        <h2 class="text-xs font-bold text-red-400 uppercase"><i class="fa-solid fa-box-archive mr-1.5"></i>Kho Nick / Tài Khoản Tự Động</h2>
+        <div class="space-y-2 text-xs">
+          <div>
+            <label class="text-gray-400 mb-1 block">Gán vào sản phẩm loại Tài khoản:</label>
+            <select id="admAccTargetProd" class="admin-input"></select>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="admAccUser" class="admin-input" placeholder="Tài khoản / Username">
+            <input type="text" id="admAccPass" class="admin-input" placeholder="Mật khẩu / Password">
+          </div>
+          <input type="text" id="admAccNote" class="admin-input" placeholder="Ghi chú thêm (Link tải, hướng dẫn...)">
+          <button onclick="adminAddCloudStock()" class="w-full bg-emerald-600 font-bold py-2.5 rounded-xl text-white border-none">Thêm Nick Vào Kho</button>
+          
+          <div class="mt-2">
+            <label class="text-gray-400 mb-1 block">Danh sách nick đang có sẵn trong kho:</label>
+            <div id="cloudStockList" class="history-wrap space-y-1.5"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card p-4 rounded-2xl space-y-3">
+        <h2 class="text-xs font-bold text-red-400 uppercase"><i class="fa-solid fa-pen-to-square mr-1.5"></i>Thêm / Sửa Sản Phẩm Shop</h2>
+        <div class="space-y-2 text-xs">
+          <div>
+            <label class="text-gray-400 mb-1 block">Chọn sản phẩm cần sửa hoặc tạo mới:</label>
+            <select id="admSelectExistProd" onchange="onAdminSelectProductChange()" class="admin-input"></select>
+          </div>
+          <input type="text" id="admProdName" class="admin-input" placeholder="Tên sản phẩm">
+          <div class="grid grid-cols-2 gap-2">
+            <input type="number" id="admProdPoints" class="admin-input" placeholder="Giá điểm (ĐC)">
+            <select id="admProdStatus" class="admin-input">
+              <option value="in_stock">Còn hàng</option>
+              <option value="out_of_stock">Hết hàng</option>
+            </select>
+          </div>
+          <input type="text" id="admProdImg" class="admin-input" placeholder="Link ảnh (URL Image)">
+          <div class="grid grid-cols-2 gap-2">
+            <select id="admProdCategory" class="admin-input">
+              <option value="GROW A GARDEN 2">GROW A GARDEN 2</option>
+              <option value="CLOUD PHONE">CLOUD PHONE</option>
+            </select>
+            <select id="admProdType" class="admin-input">
+              <option value="roblox">Roblox (Gửi tên nhận)</option>
+              <option value="account">Tài khoản (Lấy từ kho)</option>
+            </select>
+          </div>
+          <button onclick="adminSaveProduct()" class="w-full bg-emerald-600 font-bold py-2.5 rounded-xl text-white border-none">Lưu Sản Phẩm</button>
+        </div>
+      </div>
+
+      <div class="admin-card p-4 rounded-2xl space-y-2">
+        <h2 class="text-xs font-bold text-red-400 uppercase"><i class="fa-solid fa-list-check mr-1.5"></i>Nhật Ký Hoạt Động Chung</h2>
+        <div id="adminLogsList" class="history-wrap space-y-1"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Nav -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-gray-900/90 backdrop-blur border-t border-gray-800 py-2 px-6 flex justify-around items-center z-40 text-center">
+    <button onclick="switchTab('shop')" id="bottomNavShop" class="bottom-nav-btn active text-gray-400 text-xs font-bold border-none bg-transparent">
+      <i class="fa-solid fa-store block text-base mb-0.5"></i>Shop
+    </button>
+    <button onclick="switchTab('getlink')" id="bottomNavGetlink" class="bottom-nav-btn text-gray-400 text-xs font-bold border-none bg-transparent">
+      <i class="fa-solid fa-link block text-base mb-0.5"></i>Vượt Link
+    </button>
+    <button onclick="switchTab('admin')" id="bottomNavAdmin" class="bottom-nav-btn text-red-400 text-xs font-bold border-none bg-transparent hidden">
+      <i class="fa-solid fa-shield block text-base mb-0.5"></i>Quản Trị
+    </button>
+    <button onclick="handleBottomAuth()" class="text-gray-400 text-xs font-bold border-none bg-transparent">
+      <i class="fa-solid fa-user block text-base mb-0.5"></i><span id="bottomUserName">Tài khoản</span>
+    </button>
+  </nav>
+
+  <!-- Modal Kết Quả -->
+  <div id="resultOverlay" class="modal-overlay">
+    <div class="modal-box text-center space-y-3">
+      <div id="resTitle" class="font-bold text-sm text-emerald-400"></div>
+      <div id="resBody" class="text-xs text-gray-300"></div>
+      <div class="flex space-x-2 pt-2">
+        <button onclick="copyResultText()" class="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 rounded-xl text-xs border-none"><i class="fa-solid fa-copy mr-1"></i> Sao Chép</button>
+        <button onclick="closeResultModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2.5 rounded-xl text-xs border-none">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Đăng Nhập -->
+  <div id="authOverlay" class="modal-overlay">
+    <div class="modal-box space-y-3">
+      <div class="flex justify-between items-center">
+        <h3 id="authTitle" class="font-bold text-sm text-white">Đăng Nhập</h3>
+        <button onclick="closeAuth()" class="text-gray-400 text-sm font-bold bg-transparent border-none">✕</button>
+      </div>
+      <div class="space-y-2 text-xs">
+        <input type="text" id="authUser" class="admin-input" placeholder="Tên tài khoản...">
+        <input type="password" id="authPass" class="admin-input" placeholder="Mật khẩu...">
+        <button onclick="handleLogin()" id="authSubmitBtn" class="w-full bg-emerald-600 text-white font-bold py-2.5 rounded-xl border-none">Đăng Nhập</button>
+        <div class="text-center text-gray-400 pt-1">
+          Chưa có tài khoản? <button onclick="toggleAuthMode()" id="authSwitchBtn" class="text-emerald-400 underline font-bold bg-transparent border-none">Đăng ký</button>
+        </div>
+      </div>
+    </div>
+  </div>
+    <script>
+    const GTRAFFIC_KEY = "54ed5096b0af4edc8c5dd31dfb5b2502";
+
+    const defaultProds = [
+      { id: 1, name: "Super Watering Can", points: 5, img: "https://thumbsnap.com/i/jvbvSUcZ.jpg", category: "GROW A GARDEN 2", type: "roblox", status: "in_stock" },
+      { id: 2, name: "Super Sprinkler", points: 5, img: "https://thumbsnap.com/i/dXdSNpk5.jpg", category: "GROW A GARDEN 2", type: "roblox", status: "in_stock" },
+      { id: 3, name: "Dragon Breath", points: 15, img: "https://thumbsnap.com/i/viTZPv6v.jpg", category: "GROW A GARDEN 2", type: "roblox", status: "in_stock" },
+      { id: 4, name: "Star Fruit", points: 30, img: "https://thumbsnap.com/i/937fNiTC.jpg", category: "GROW A GARDEN 2", type: "roblox", status: "in_stock" },
+      { id: 8, name: "UgPhone Trial", points: 20, img: "https://thumbsnap.com/i/8Ntd9Gf5.png", category: "CLOUD PHONE", type: "account", status: "in_stock" }
+    ];
+
+    let userDB = {}, activeUser = "ronnei.htk7", logHistory = [], products = [], cloudStock = [], isLoginMode = true, currentCopy = "";
+
+    function initSystem() {
+      try {
+        let u = localStorage.getItem("gU"); if (u) userDB = JSON.parse(u);
+        let sa = localStorage.getItem("gA"); if (sa) activeUser = sa;
+        let l = localStorage.getItem("gL"); if (l) logHistory = JSON.parse(l);
+        let p = localStorage.getItem("gP"); products = p ? JSON.parse(p) : defaultProds;
+        let c = localStorage.getItem("gC"); cloudStock = c ? JSON.parse(c) : [];
+      } catch (e) { userDB = {}; logHistory = []; products = defaultProds; cloudStock = []; }
+      
+      userDB["ronnei.htk7"] = { password: "123", points: 999999, role: "admin", recipient: "ronnei.htk7", history: userDB["ronnei.htk7"]?.history || [] };
+      userDB["HowellThang"] = { password: "123", points: 999999, role: "admin", recipient: "HowellThang", history: userDB["HowellThang"]?.history || [] };
+
+      if (!userDB[activeUser]) activeUser = "ronnei.htk7";
+      
+      checkUrlReturn(); saveData(); updateUI();
+    }
+
+    function saveData() {
+      localStorage.setItem("gU", JSON.stringify(userDB));
+      localStorage.setItem("gA", activeUser);
+      localStorage.setItem("gP", JSON.stringify(products));
+      localStorage.setItem("gC", JSON.stringify(cloudStock));
+      localStorage.setItem("gL", JSON.stringify(logHistory));
+    }
+
+    function checkUrlReturn() {
+      const p = new URLSearchParams(window.location.search);
+      if (p.get("status") === "completed") {
+        userDB[activeUser].points = (userDB[activeUser].points || 0) + 5;
+        const t = new Date().toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' });
+        if (!userDB[activeUser].history) userDB[activeUser].history = [];
+        const taskInfo = { type: "task", title: "Vượt Link Gtraffic", copyText: `Vượt link thành công: +5 ĐC (${t})`, time: t };
+        userDB[activeUser].history.unshift(taskInfo);
+        addLog(activeUser, "Vượt Link (+5Đ)", "-", 5);
+        saveData();
+        window.history.replaceState({}, document.title, window.location.pathname);
+        openResultModal("🎉 NHẬN ĐIỂM THÀNH CÔNG!", `<div class="text-emerald-400 font-bold">Vượt link hoàn tất!</div><div class="text-amber-300 mt-1">+5 Điểm (ĐC) đã được cộng.</div>`, taskInfo.copyText);
+      }
+    }
+
+    function renderProducts() {
+      const c = document.getElementById("productListContainer"); if (!c) return; c.innerHTML = "";
+      const cats = ["GROW A GARDEN 2", "CLOUD PHONE"], isAdmin = userDB[activeUser]?.role === "admin";
+      
+      cats.forEach(cat => {
+        const list = products.filter(p => (p.category || "GROW A GARDEN 2") === cat);
+        if (list.length) {
+          let h = `<div class="pt-2"><h2 class="text-xs font-bold text-gray-300 uppercase mb-3"><i class="fa-solid ${cat === 'CLOUD PHONE' ? 'fa-mobile-screen-button' : 'fa-seedling'} text-emerald-400 mr-1.5"></i>${cat}</h2></div>`;
+          list.forEach(i => {
+            const isOutOfStock = i.status === "out_of_stock";
+            const statusTag = isOutOfStock 
+              ? `<span class="text-[11px] font-bold text-red-500 flex items-center"><i class="fa-solid fa-circle-xmark mr-1 text-[10px]"></i>Hết hàng</span>`
+              : `<span class="text-[11px] font-bold text-emerald-400 flex items-center"><i class="fa-solid fa-circle-check mr-1 text-[10px]"></i>Còn hàng</span>`;
+
+            h += `<div class="glow-card p-3.5 rounded-2xl flex items-center justify-between mb-3">
+              <div class="flex items-center space-x-3">
+                <div class="item-img-box"><img src="${i.img}"></div>
+                <div>
+                  <h3 class="font-bold text-sm text-white">${i.name}</h3>
+                  <div class="flex items-center space-x-2 mt-1">
+                    <span class="text-xs font-extrabold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded">${i.points} Điểm</span>
+                    ${statusTag}
+                  </div>
+                </div>
+              </div>
+              <div class="flex flex-col space-y-1">
+                <button onclick="redeemItem('${i.name}',${i.points})" class="${isOutOfStock ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-emerald-600 text-white'} text-xs font-bold px-3 py-2 rounded-xl border-none">${isOutOfStock ? 'Hết Hàng' : 'Đổi Quà'}</button>
+                ${isAdmin ? `<button onclick="adminDeleteProduct(${i.id})" class="text-[10px] text-red-400 underline border-none bg-transparent">Xóa SP</button>` : ''}
+              </div>
+            </div>`;
+          });
+          c.innerHTML += h;
+        }
+      });
+    }
+
+    function switchTab(t) {
+      if (t === 'admin' && userDB[activeUser]?.role !== 'admin') { alert("⚠️ Chỉ dành cho Admin!"); return; }
+      ['Shop', 'Getlink', 'Admin'].forEach(k => {
+        const sk = k.toLowerCase();
+        document.getElementById("section" + k)?.classList.toggle("hidden", sk !== t);
+        document.getElementById("topTab" + k)?.classList.toggle("active", sk === t);
+        document.getElementById("bottomNav" + k)?.classList.toggle("active", sk === t);
+      });
+    }
+
+    function updateUI() {
+      const role = userDB[activeUser]?.role || "user", isAdmin = role === "admin";
+      document.getElementById("activeUsername").innerText = activeUser;
+      document.getElementById("headerPoints").innerText = `${userDB[activeUser]?.points || 0} ĐC`;
+      document.getElementById("bottomUserName").innerText = activeUser;
+      document.getElementById("robloxRecipientInput").value = userDB[activeUser]?.recipient || "";
+      document.getElementById("topTabAdmin")?.classList.toggle("hidden", !isAdmin);
+      document.getElementById("bottomNavAdmin")?.classList.toggle("hidden", !isAdmin);
+      
+      const b = document.getElementById("roleBadge");
+      if (b) {
+        b.innerText = isAdmin ? "ADMIN TOÀN QUYỀN" : "THÀNH VIÊN";
+        b.className = isAdmin ? "text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 px-1.5 py-0.2 rounded font-bold" : "text-[9px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.2 rounded font-bold";
+      }
+
+      checkAndShowAdminNote();
+      renderUserHistory(); renderLogs(); renderProducts(); updateAccProductDropdown(); updateAdminUserDropdown();
+    }
+
+    function checkAndShowAdminNote() {
+      const note = userDB[activeUser]?.adminNote;
+      if (note) {
+        const toast = document.getElementById("adminNoteToast");
+        const textEl = document.getElementById("adminNoteText");
+        const timerEl = document.getElementById("noteTimer");
+
+        textEl.innerText = note;
+        toast.classList.remove("hidden");
+
+        let count = 10;
+        timerEl.innerText = `${count}s`;
+        delete userDB[activeUser].adminNote;
+        saveData();
+
+        const interval = setInterval(() => {
+          count--;
+          if (count > 0) {
+            timerEl.innerText = `${count}s`;
+          } else {
+            clearInterval(interval);
+            toast.classList.add("hidden");
+          }
+        }, 1000);
+      }
+    }
+
+    function redeemItem(name, cost) {
+      const prod = products.find(p => p.name.toLowerCase() === name.toLowerCase());
+      if (prod && prod.status === "out_of_stock") { alert(`⚠️ Sản phẩm "${name}" hiện tại đã HẾT HÀNG!`); return; }
+
+      const isAccType = prod ? prod.type === "account" : (name.toLowerCase().includes("cloud") || name.toLowerCase().includes("ugphone"));
+      const pts = userDB[activeUser]?.points || 0;
+      if (pts < cost) { alert(`⚠️ Cần ${cost} ĐC nhưng bạn chỉ có ${pts} ĐC.`); return; }
+
+      const t = new Date().toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' });
+
+      if (isAccType) {
+        const accIndex = cloudStock.findIndex(a => a.prodName && a.prodName.toLowerCase() === name.toLowerCase());
+        if (accIndex === -1) { alert(`⚠️ Sản phẩm "${name}" hiện tại đã hết nick trong kho!`); return; }
+        
+        const acc = cloudStock.splice(accIndex, 1)[0];
+        userDB[activeUser].points -= cost;
+        if (!userDB[activeUser].history) userDB[activeUser].history = [];
+        
+        const noteTxt = acc.note ? ` | Note: ${acc.note}` : "";
+        const str = `Sản phẩm: ${name} | TK: ${acc.user} | MK: ${acc.pass}${noteTxt}`;
+        
+        userDB[activeUser].history.unshift({ type: "cloud", title: name, user: acc.user, pass: acc.pass, note: acc.note, copyText: str, time: t });
+        saveData(); updateUI(); renderCloudStock(); addLog(activeUser, `Đổi ${name}`, "-", -cost);
+        
+        openResultModal(`ĐỔI QUÀ: ${name.toUpperCase()}`, `<div class="text-amber-400 font-bold mb-1">🎉 MUA TÀI KHOẢN THÀNH CÔNG!</div><div class="bg-gray-900 p-2 rounded border border-gray-700 text-xs">Sản phẩm: <span class="text-amber-300 font-bold">${name}</span><br>Tk: <span class="text-emerald-400 font-mono font-bold">${acc.user}</span><br>Mk: <span class="text-amber-300 font-mono font-bold">${acc.pass}</span><br><span class="text-gray-400 italic">Ghi chú: ${acc.note || 'Không có'}</span></div>`, str);
+        return;
+      }
+
+      const rec = userDB[activeUser]?.recipient?.trim();
+      if (!rec) { alert("⚠️ Vui lòng nhập Tên Roblox và bấm Lưu!"); document.getElementById("robloxRecipientInput").focus(); return; }
+
+      userDB[activeUser].points -= cost;
+      if (!userDB[activeUser].history) userDB[activeUser].history = [];
+      const str = `Đã đổi quà '${name}' cho nick Roblox: ${rec}`;
+      userDB[activeUser].history.unshift({ type: "roblox", title: name, recipient: rec, copyText: str, time: t });
+      saveData(); updateUI(); addLog(activeUser, `Đổi ${name}`, rec, -cost);
+      openResultModal("THÔNG BÁO ĐỔI QUÀ", `<div class="text-emerald-400 font-bold mb-1">🎉 ĐỔI QUÀ THÀNH CÔNG!</div><div class="bg-gray-900 p-2 rounded border border-gray-700">Vật phẩm: <b>${name}</b><br>Nhận bởi: <b class="text-amber-300">${rec}</b></div>`, str);
+    }
+
+    function openResultModal(title, html, copyTxt) {
+      document.getElementById("resTitle").innerText = title;
+      document.getElementById("resBody").innerHTML = html;
+      currentCopy = copyTxt;
+      document.getElementById("resultOverlay").classList.add("active");
+    }
+    function closeResultModal() { document.getElementById("resultOverlay").classList.remove("active"); }
+    function copyResultText() { if (currentCopy) copyToClipboard(currentCopy); }
+    function copyToClipboard(txt) {
+      navigator.clipboard.writeText(txt).then(() => alert("✅ Đã sao chép:\n" + txt)).catch(() => {
+        let i = document.createElement("input"); i.value = txt; document.body.appendChild(i); i.select(); document.execCommand("copy"); document.body.removeChild(i); alert("✅ Đã sao chép!");
+      });
+    }
+
+    function renderUserHistory() {
+      const b = document.getElementById("userHistoryList"); if (!b) return; b.innerHTML = "";
+      const h = userDB[activeUser]?.history || [];
+      if (!h.length) { b.innerHTML = `<div class="text-xs text-gray-500 italic text-center py-2">Chưa có lịch sử</div>`; return; }
+      h.forEach(i => {
+        let d = i.type === "task" ? `<span class="text-amber-300 font-bold">+5 Điểm Cấu</span>` : i.type === "cloud" ? `Tk: <b class="text-emerald-400">${i.user}</b> | Mk: <b class="text-amber-300">${i.pass}</b>${i.note ? ` | Note: <b>${i.note}</b>` : ''}` : `Tên nhận: <b class="text-amber-300">${i.recipient || i.pass}</b>`;
+        b.innerHTML += `<div class="bg-gray-900/90 border border-emerald-500/20 p-2.5 rounded-xl flex items-center justify-between text-xs mb-2 space-x-2">
+          <div class="flex-1 overflow-hidden">
+            <div class="font-bold text-emerald-400">${i.title || i.name} <span class="text-[10px] text-gray-500 font-normal">(${i.time})</span></div>
+            <div class="text-gray-300 mt-0.5 truncate">${d}</div>
+          </div>
+          <button onclick="copyToClipboard('${i.copyText}')" class="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-1 rounded-lg text-[10px] font-bold border-none"><i class="fa-solid fa-copy"></i> Copy</button>
+        </div>`;
+      });
+    }
+
+    function confirmRecipientName() {
+      const v = document.getElementById("robloxRecipientInput").value.trim();
+      if (!v) { alert("⚠️ Vui lòng nhập Tên Roblox!"); return; }
+      userDB[activeUser].recipient = v; saveData(); alert(`✅ Đã lưu Tên Roblox: "${v}"`);
+    }
+            function openAuth() { document.getElementById("authOverlay").classList.add("active"); }
+    function closeAuth() { document.getElementById("authOverlay").classList.remove("active"); }
+    function toggleAuthMode() {
+      isLoginMode = !isLoginMode;
+      document.getElementById("authTitle").innerText = isLoginMode ? "Đăng Nhập" : "Đăng Ký";
+      document.getElementById("authSubmitBtn").innerText = isLoginMode ? "Đăng Nhập" : "Tạo Tài Khoản";
+      document.getElementById("authSwitchBtn").innerText = isLoginMode ? "Đăng ký" : "Đăng nhập";
+    }
+
+    function handleLogin() {
+      const u = document.getElementById("authUser").value.trim(), p = document.getElementById("authPass").value.trim();
+      if (!u || !p) { alert("⚠️ Nhập đầy đủ thông tin!"); return; }
+      
+      if ((u === "ronnei.htk7" || u === "HowellThang") && p === "123") {
+        userDB[u] = { password: p, points: 999999, role: "admin", recipient: u, history: userDB[u]?.history || [] };
+        activeUser = u; alert("✅ Đăng nhập Admin thành công!");
+      } else {
+        if (!userDB[u]) { userDB[u] = { password: p, points: 0, role: "user", recipient: "", history: [] }; alert(`✅ Tạo tài khoản thành công!`); }
+        else { if (userDB[u].password !== p && userDB[u].password !== "") { alert("❌ Mật khẩu không đúng!"); return; } alert(`✅ Đăng nhập thành công!`); }
+        activeUser = u;
+      }
+      saveData(); updateUI(); closeAuth();
+    }
+    function handleBottomAuth() { openAuth(); }
+
+    function updateAdminUserDropdown() {
+      const selUser = document.getElementById("admSelectUser");
+      if (!selUser) return;
+      selUser.innerHTML = "";
+      const users = Object.keys(userDB);
+      if (!users.length) { selUser.innerHTML = `<option value="">-- Chưa có thành viên --</option>`; return; }
+      users.forEach(u => {
+        const roleText = userDB[u].role === 'admin' ? ' [ADMIN]' : '';
+        selUser.innerHTML += `<option value="${u}">👤 ${u} (${userDB[u].points || 0} ĐC)${roleText}</option>`;
+      });
+      onAdminSelectUserChange();
+    }
+
+    function onAdminSelectUserChange() {
+      const targetUser = document.getElementById("admSelectUser")?.value;
+      if (!targetUser || !userDB[targetUser]) return;
+      const uObj = userDB[targetUser];
+      document.getElementById("admUserCurrentPts").innerText = `${uObj.points || 0} ĐC`;
+      document.getElementById("admUserRoblox").innerText = uObj.recipient || "Chưa lưu";
+      document.getElementById("admEditPointsInput").value = uObj.points || 0;
+
+      const historyBox = document.getElementById("admSelectedUserHistory");
+      if (historyBox) {
+        historyBox.innerHTML = "";
+        const h = uObj.history || [];
+        if (!h.length) { historyBox.innerHTML = `<div class="text-gray-500 italic">Thành viên này chưa làm gì</div>`; } 
+        else {
+          h.forEach(item => {
+            historyBox.innerHTML += `<div class="bg-gray-900 p-1.5 rounded border border-gray-800"><span class="text-emerald-400 font-bold">${item.title || item.name}</span> <span class="text-[10px] text-gray-500">(${item.time})</span>: <span class="text-gray-300">${item.copyText || ''}</span></div>`;
+          });
+        }
+      }
+    }
+
+    function adminSetUserPoints() {
+      if (userDB[activeUser]?.role !== "admin") return;
+      const targetUser = document.getElementById("admSelectUser")?.value;
+      const newPts = parseInt(document.getElementById("admEditPointsInput").value);
+      if (!targetUser || !userDB[targetUser]) { alert("⚠️ Chưa chọn thành viên!"); return; }
+      if (isNaN(newPts)) { alert("⚠️ Vui lòng nhập số điểm hợp lệ!"); return; }
+      const oldPts = userDB[targetUser].points || 0;
+      userDB[targetUser].points = newPts;
+      addLog(activeUser, `Sửa điểm ${targetUser}: ${oldPts} -> ${newPts}`, "-", 0);
+      saveData(); updateUI();
+      alert(`✅ Đã cập nhật điểm cho "${targetUser}" thành ${newPts} ĐC!`);
+    }
+
+    function adminSendNoteToUser() {
+      if (userDB[activeUser]?.role !== "admin") return;
+      const targetUser = document.getElementById("admSelectUser")?.value;
+      const noteText = document.getElementById("admSendNoteInput").value.trim();
+      if (!targetUser || !userDB[targetUser]) { alert("⚠️ Chưa chọn thành viên!"); return; }
+      if (!noteText) { alert("⚠️ Vui lòng nhập lời nhắn!"); return; }
+      userDB[targetUser].adminNote = noteText;
+      saveData();
+      document.getElementById("admSendNoteInput").value = "";
+      alert(`✅ Đã gửi Note cho "${targetUser}"!`);
+    }
+
+    function updateAccProductDropdown() {
+      const selEdit = document.getElementById("admSelectExistProd");
+      if (selEdit) {
+        selEdit.innerHTML = `<option value="NEW">➕ -- Tạo Sản Phẩm Mới --</option>`;
+        products.forEach(p => {
+          const st = p.status === 'out_of_stock' ? ' [HẾT HÀNG]' : ' [CÒN HÀNG]';
+          selEdit.innerHTML += `<option value="${p.id}">📦 ${p.name} (${p.points} ĐC)${st}</option>`;
+        });
+      }
+      const selAcc = document.getElementById("admAccTargetProd");
+      if (selAcc) {
+        selAcc.innerHTML = "";
+        const accProds = products.filter(p => p.type === "account" || p.category === "CLOUD PHONE");
+        if (!accProds.length) { selAcc.innerHTML = `<option value="">-- Chưa có sản phẩm loại Tài Khoản --</option>`; } 
+        else {
+          accProds.forEach(p => { selAcc.innerHTML += `<option value="${p.name}">Gán vào: ${p.name}</option>`; });
+        }
+      }
+    }
+
+    function onAdminSelectProductChange() {
+      const selVal = document.getElementById("admSelectExistProd").value;
+      if (selVal === "NEW") {
+        document.getElementById("admProdName").value = "";
+        document.getElementById("admProdPoints").value = "";
+        document.getElementById("admProdImg").value = "";
+        document.getElementById("admProdStatus").value = "in_stock";
+        return;
+      }
+      const prod = products.find(p => p.id == selVal);
+      if (prod) {
+        document.getElementById("admProdName").value = prod.name;
+        document.getElementById("admProdPoints").value = prod.points;
+        document.getElementById("admProdImg").value = prod.img;
+        document.getElementById("admProdCategory").value = prod.category || "GROW A GARDEN 2";
+        document.getElementById("admProdType").value = prod.type || "roblox";
+        document.getElementById("admProdStatus").value = prod.status || "in_stock";
+      }
+    }
+
+    function adminSaveProduct() {
+      if (userDB[activeUser]?.role !== "admin") return;
+      const n = document.getElementById("admProdName").value.trim();
+      const pts = parseInt(document.getElementById("admProdPoints").value);
+      const img = document.getElementById("admProdImg").value.trim();
+      const cat = document.getElementById("admProdCategory").value;
+      const type = document.getElementById("admProdType").value;
+      const status = document.getElementById("admProdStatus").value;
+
+      if (!n || isNaN(pts) || !img) { alert("⚠️ Nhập đầy đủ thông tin!"); return; }
+      
+      const idx = products.findIndex(p => p.name.toLowerCase() === n.toLowerCase());
+      if (idx >= 0) { 
+        products[idx].points = pts; products[idx].img = img; products[idx].category = cat; products[idx].type = type; products[idx].status = status;
+      } else {
+        const newId = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
+        products.push({ id: newId, name: n, points: pts, img: img, category: cat, type: type, status: status });
+      }
+      saveData(); updateUI(); updateAccProductDropdown();
+      alert("✅ Lưu sản phẩm thành công!");
+    }
+
+    function adminDeleteProduct(id) {
+      if (userDB[activeUser]?.role !== "admin") return;
+      if (confirm("⚠️ Bạn có chắc muốn xóa sản phẩm này không?")) {
+        products = products.filter(p => p.id !== id);
+        saveData(); updateUI(); updateAccProductDropdown();
+        alert("✅ Đã xóa sản phẩm!");
+      }
+    }
+
+    function renderCloudStock() {
+      const c = document.getElementById("cloudStockList");
+      if (!c) return; c.innerHTML = "";
+      if (!cloudStock.length) { c.innerHTML = `<div class="text-xs text-gray-500 italic text-center py-2">Kho tài khoản trống</div>`; return; }
+      cloudStock.forEach((item, index) => {
+        c.innerHTML += `<div class="bg-gray-900 p-2.5 rounded-xl border border-gray-800 text-xs flex justify-between items-center mb-2">
+          <div>
+            <div class="text-emerald-400 font-bold">${item.prodName || 'Chung'}</div>
+            <div class="text-gray-300">Tk: <span class="text-amber-300 font-mono">${item.user}</span> | Mk: <span class="text-amber-300 font-mono">${item.pass}</span></div>
+            ${item.note ? `<div class="text-gray-400 text-[10px]">Note: ${item.note}</div>` : ''}
+          </div>
+          <button onclick="adminDeleteCloudStock(${index})" class="text-red-400 text-xs font-bold underline bg-transparent border-none">Xóa</button>
+        </div>`;
+      });
+    }
+
+    function adminAddCloudStock() {
+      if (userDB[activeUser]?.role !== "admin") return;
+      const prodName = document.getElementById("admAccTargetProd").value;
+      const user = document.getElementById("admAccUser").value.trim();
+      const pass = document.getElementById("admAccPass").value.trim();
+      const note = document.getElementById("admAccNote").value.trim();
+      if (!user || !pass || !prodName) { alert("⚠️ Vui lòng nhập đầy đủ thông tin!"); return; }
+      cloudStock.push({ prodName, user, pass, note });
+      document.getElementById("admAccUser").value = "";
+      document.getElementById("admAccPass").value = "";
+      document.getElementById("admAccNote").value = "";
+      saveData(); renderCloudStock();
+      alert(`✅ Đã thêm tài khoản vào kho!`);
+    }
+
+    function adminDeleteCloudStock(index) {
+      if (userDB[activeUser]?.role !== "admin") return;
+      if (confirm("Xóa tài khoản này khỏi kho?")) {
+        cloudStock.splice(index, 1);
+        saveData(); renderCloudStock();
+        alert("✅ Đã xóa!");
+      }
+    }
+
+    function renderLogs() {
+      const b = document.getElementById("adminLogsList");
+      if (!b) return; b.innerHTML = "";
+      if (!logHistory.length) { b.innerHTML = `<div class="text-xs text-gray-500 italic text-center py-2">Chưa có nhật ký hoạt động</div>`; return; }
+      logHistory.forEach(l => {
+        b.innerHTML += `<div class="bg-gray-900 p-2 rounded border border-gray-800 text-[11px] mb-1.5 flex justify-between">
+          <div><b class="text-emerald-400">${l.user}</b>: ${l.action} (${l.target})</div>
+          <div class="text-gray-500">${l.time}</div>
+        </div>`;
+      });
+    }
+
+    function addLog(user, action, target, points) {
+      const t = new Date().toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' });
+      logHistory.unshift({ user, action, target, points, time: t });
+      if (logHistory.length > 50) logHistory.pop();
+      saveData(); renderLogs();
+    }
+
+    function adminDeleteUser() {
+      if (userDB[activeUser]?.role !== "admin") return;
+      const targetUser = document.getElementById("admSelectUser")?.value;
+      if (!targetUser || targetUser === activeUser) { alert("⚠️ Không thể xóa chính mình hoặc chưa chọn tài khoản!"); return; }
+      if (confirm(`⚠️ Bạn có chắc muốn xóa vĩnh viễn tài khoản "${targetUser}" không?`)) {
+        delete userDB[targetUser];
+        saveData(); updateUI();
+        alert(`✅ Đã xóa tài khoản "${targetUser}"!`);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initSystem();
+    });
+  </script>
 </body>
 </html>
